@@ -150,3 +150,15 @@ void AEncore_TheLastHeist1Character::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+void AEncore_TheLastHeist1Character::SetCanJump(bool CanJump)
+{
+	bCanJump = CanJump;
+}
+
+void AEncore_TheLastHeist1Character::Jump()
+{
+	if (!bCanJump) { return; }
+	
+	Super::Jump();
+}

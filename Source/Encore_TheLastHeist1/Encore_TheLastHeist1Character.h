@@ -33,6 +33,7 @@ class AEncore_TheLastHeist1Character : public ACharacter, public IGenericTeamAge
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+	
 public:
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	virtual void BeginPlay() override;
@@ -97,5 +98,13 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	
+	
+	UPROPERTY(EditAnywhere, Category="Jump")
+	bool bCanJump = true;
+	
+	UFUNCTION(BlueprintCallable, Category="Jump")
+	void SetCanJump(bool CanJump);
+	
+	virtual void Jump() override;
 };
 
