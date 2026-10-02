@@ -8,12 +8,18 @@
 #include "Blueprint/UserWidget.h"
 #include "Encore_TheLastHeist1.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+/*#inclide "AEncore_TheLastHeist1PlayerState.h"*/
 
 
 
 FGenericTeamId AEncore_TheLastHeist1PlayerController::GetGenericTeamId() const
 {
-	return FGenericTeamId(0);
+	/*if (const AEncore_TheLastHeist1PlayerState* PS = GetPlayerState<AEncore_TheLastHeist1PlayerState>())
+	{
+		return FGenericTeamId(PS->TeamId);
+	}*/
+
+	return FGenericTeamId::NoTeam;
 }
 
 void AEncore_TheLastHeist1PlayerController::BeginPlay()

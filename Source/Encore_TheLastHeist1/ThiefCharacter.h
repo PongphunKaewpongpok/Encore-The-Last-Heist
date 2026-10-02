@@ -16,7 +16,8 @@ class ENCORE_THELASTHEIST1_API AThiefCharacter : public AEncore_TheLastHeist1Cha
 {
 	GENERATED_BODY()
 
-
+	FTimerHandle KickTimerHandle;
+	FTimerHandle KnockdownTimerHandle;
 public:
 	AThiefCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -34,11 +35,31 @@ protected:
 	void DoKick(const FInputActionValue& Value);
 	void UpdateSprint();
 	
-	bool bRollingDone = true;
+	bool bDoAnimationDone = true;
+	void OnMontageFinished(UAnimMontage* Montage, bool bInterrupted);
+	
 	void StartRolling();
-	void OnRollingFinished(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* RollingAnimation;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* KickAction;
+	float LastKickTime = -1000.0f;
+	void Knockdown(const FVector& Direction, const float Strength);
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* KickingAnimation;
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* GotKnockdownAnimation;
+	UPROPERTY(EditAnywhere, Category="Kick")
+	float KickRange = 150.f;
+	UPROPERTY(EditAnywhere, Category="Kick") 
+	float KickHalfAngle = 60.f;
+	UPROPERTY(EditDefaultsOnly, Category="Kick")
+	float KickCooldown = 10.0f;
+	UPROPERTY(EditDefaultsOnly, Category="Kick")
+	float KickStrength = 800.0f;
+	UPROPERTY(VisibleAnywhere, Category="Kick")
+	class USphereComponent* KickReach;
 	
 public:
 	virtual void DoMove(float Right, float Forward) override;
@@ -46,7 +67,11 @@ public:
 	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerSprint(bool bIsSprint);
-	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerKick();
+	
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_Knockdown(const FVector& Direction, const float Strength);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_Kick();
 };
