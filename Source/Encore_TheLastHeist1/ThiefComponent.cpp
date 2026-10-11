@@ -32,3 +32,22 @@ void UThiefComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
+TArray<UItemDataAsset*> UThiefComponent::GetInventory() const
+{
+	TArray<UItemDataAsset*> Result;
+
+	for (const TObjectPtr<UItemDataAsset>& Item : Items)
+	{
+		Result.Add(Item.Get());
+	}
+
+	return Result;
+}
+
+void UThiefComponent::AddInventory(UItemDataAsset* NewItem)
+{
+	if (!IsValid(NewItem)) { return; }
+
+	Items.Add(NewItem);
+}
+

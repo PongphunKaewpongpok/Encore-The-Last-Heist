@@ -34,6 +34,8 @@ protected:
 	void ToggleSprint(const FInputActionValue& Value);
 	void DoKick(const FInputActionValue& Value);
 	void UpdateSprint();
+	const float WalkingSpeed = 100.0f;
+	const float RunningSpeed = 500.0f;
 	
 	bool bDoAnimationDone = true;
 	void OnMontageFinished(UAnimMontage* Montage, bool bInterrupted);
@@ -60,6 +62,8 @@ protected:
 	float KickStrength = 800.0f;
 	UPROPERTY(VisibleAnywhere, Category="Kick")
 	class USphereComponent* KickReach;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Kick")
+	TArray<TObjectPtr<UStaticMesh>> KickableMeshes;
 	
 public:
 	virtual void DoMove(float Right, float Forward) override;

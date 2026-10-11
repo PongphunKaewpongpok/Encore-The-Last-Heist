@@ -18,6 +18,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FText ItemName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText Rarity;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Weight = 0.0f;

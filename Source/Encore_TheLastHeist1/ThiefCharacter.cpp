@@ -56,6 +56,7 @@ void AThiefCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 }
 
 
+
 void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 {
 	ServerSprint(Value.Get<bool>());
@@ -72,11 +73,11 @@ void AThiefCharacter::UpdateSprint()
 	
 	if (ThiefComponent->bIsSprint)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+		GetCharacterMovement()->MaxWalkSpeed = RunningSpeed;
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
 	}
 }
 
@@ -222,14 +223,14 @@ void AThiefCharacter::ServerKick_Implementation()
 	Multicast_Kick();
 	
 	TArray<AActor*> Overlapping;
-	KickReach->GetOverlappingActors(Overlapping, AThiefCharacter::StaticClass());
+	KickReach->GetOverlappingActors(Overlapping);
 		
 	TSet<AActor*> AlreadyHit;
 	const FVector Origin  = GetActorLocation();
 	const FVector Forward = GetActorForwardVector();
 	const float CosThresh = FMath::Cos(
 	FMath::DegreesToRadians(KickHalfAngle));
-		
+	
 	for (AActor* T : Overlapping)
 	{
 		if (!T || T == this) continue;
@@ -237,13 +238,12 @@ void AThiefCharacter::ServerKick_Implementation()
 			
 		const FVector To = T->GetActorLocation() - Origin;
 		const float Dist = To.Size();
-			
 		if (Dist > KickRange) continue;
 			
 		const FVector Dir = To.GetSafeNormal();
-		
 		if (FVector::DotProduct(Forward, Dir) < CosThresh) continue;
 		
+		// Target: Player
 		if (AThiefCharacter* Target = Cast<AThiefCharacter>(T))
 		{
 			Target->Multicast_Knockdown(Forward, KickStrength);
