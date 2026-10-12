@@ -5,7 +5,7 @@
 #include "EngineUtils.h"
 #include "Engine/TriggerBox.h"
 #include "Components/BoxComponent.h"
-#include "Engine/StaticMeshActor.h"
+#include "InteractableActor.h"
 #include "Components/StaticMeshComponent.h"
 
 void AEncore_TheLastHeist1GameMode::BeginPlay()
@@ -70,17 +70,16 @@ void AEncore_TheLastHeist1GameMode::SpawnRandomItems(const int SpawnCount)
         UItemDataAsset* Item = SpawnableItems[FMath::RandRange(0, SpawnableItems.Num() - 1)];
         if (!Item || !Item->Mesh) continue;
 
-        AStaticMeshActor* SpawnedActor =
-            GetWorld()->SpawnActor<AStaticMeshActor>(
-                AStaticMeshActor::StaticClass(),
+        AInteractableActor* SpawnedActor =
+            GetWorld()->SpawnActor<AInteractableActor>(
+                InteractableClass,
                 Hit.Location + FVector(0.0f, 0.0f, 5.0f),
                 FRotator::ZeroRotator
             );
-        UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.Location + FVector(0.0f, 0.0f, 5.0f)).ToString());
-
-        if (SpawnedActor)
+        
+        if (IsValid(SpawnedActor) && IsValid(Item) && IsValid(Item->Mesh))
         {
-            SpawnedActor->GetStaticMeshComponent()->SetStaticMesh(Item->Mesh);
+            SpawnedActor->SetItemMesh(Item->Mesh);
         }
     }
 }

@@ -4,6 +4,7 @@
 
 #include "ItemDataAsset.h"
 #include "Engine/TriggerBox.h"
+#include "InteractableActor.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -27,8 +28,12 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<TObjectPtr<UItemDataAsset>> SpawnableItems;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AInteractableActor> InteractableClass;
+	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	TArray<TObjectPtr<ATriggerBox>> SpawnableArea;
+	
 	
 	void SpawnRandomItems(const int SpawnCount);
 };
