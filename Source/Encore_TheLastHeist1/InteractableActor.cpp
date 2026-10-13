@@ -5,11 +5,16 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/PrimitiveComponent.h"
-#include "ThiefCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/StaticMeshComponent.h"
 
-void AInteractableActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+#include "ThiefCharacter.h"
+#include "ThiefPlayerController.h"
+#include "Widgets/ItemOnGroundTab.h"
+
+
+// Item Highlight
+void AInteractableActor::OnBeginOverlapHighlight(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this) return;
@@ -26,7 +31,7 @@ void AInteractableActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent
 	}
 }
 
-void AInteractableActor::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AInteractableActor::OnEndOverlapHighlight(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (!OtherActor || OtherActor == this) return;
@@ -43,6 +48,44 @@ void AInteractableActor::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
+
+// Item Collectable
+void AInteractableActor::OnBeginOverlapCollectable(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor || OtherActor == this) return;
+	
+	AThiefCharacter* Target = Cast<AThiefCharacter>(OtherActor);
+	if (!IsValid(Target)) return;
+	
+	
+	
+	if (Target->IsLocallyControlled())
+	{
+		AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(Target->GetController());
+		TargetPC->ItemOnGroundTabWidget->AddItemBar(this);
+	}
+}
+
+void AInteractableActor::OnEndOverlapCollectable(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (!OtherActor || OtherActor == this) return;
+	
+	AThiefCharacter* Target = Cast<AThiefCharacter>(OtherActor);
+	if (!IsValid(Target)) return;
+	
+	
+	
+	if (Target->IsLocallyControlled())
+	{
+		AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(Target->GetController());
+		TargetPC->ItemOnGroundTabWidget->RemoveItemBar(this);
+	}
+}
+
+
+
 // Sets default values
 AInteractableActor::AInteractableActor()
 {
@@ -54,20 +97,36 @@ AInteractableActor::AInteractableActor()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	SetRootComponent(StaticMesh);
 
-	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
-	SphereCollision->SetupAttachment(StaticMesh);
-	SphereCollision->SetSphereRadius(750.0f);
-	SphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	SphereCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
-	SphereCollision->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
-	SphereCollision->SetGenerateOverlapEvents(true);
-	SphereCollision->OnComponentBeginOverlap.AddDynamic(
+	HighlightCollision = CreateDefaultSubobject<USphereComponent>(TEXT("HighlightCollision"));
+	HighlightCollision->SetupAttachment(StaticMesh);
+	HighlightCollision->SetSphereRadius(750.0f);
+	HighlightCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HighlightCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	HighlightCollision->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+	HighlightCollision->SetGenerateOverlapEvents(true);
+	HighlightCollision->OnComponentBeginOverlap.AddDynamic(
 		this,
-		&AInteractableActor::OnBeginOverlap
+		&AInteractableActor::OnBeginOverlapHighlight
 	);
-	SphereCollision->OnComponentEndOverlap.AddDynamic(
+	HighlightCollision->OnComponentEndOverlap.AddDynamic(
 		this,
-		&AInteractableActor::OnEndOverlap
+		&AInteractableActor::OnEndOverlapHighlight
+	);
+	
+	CollectableCollision = CreateDefaultSubobject<USphereComponent>(TEXT("CollectableCollision"));
+	CollectableCollision->SetupAttachment(StaticMesh);
+	CollectableCollision->SetSphereRadius(150.0f);
+	CollectableCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollectableCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	CollectableCollision->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+	CollectableCollision->SetGenerateOverlapEvents(true);
+	CollectableCollision->OnComponentBeginOverlap.AddDynamic(
+		this,
+		&AInteractableActor::OnBeginOverlapCollectable
+	);
+	CollectableCollision->OnComponentEndOverlap.AddDynamic(
+		this,
+		&AInteractableActor::OnEndOverlapCollectable
 	);
 }
 
@@ -90,6 +149,7 @@ void AInteractableActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AInteractableActor, ReplicatedItemMesh);
+	DOREPLIFETIME(AInteractableActor, ItemData);
 }
 
 void AInteractableActor::OnRep_ItemMesh()

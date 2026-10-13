@@ -79,6 +79,7 @@ void AEncore_TheLastHeist1GameMode::SpawnRandomItems(const int SpawnCount)
         
         if (IsValid(SpawnedActor) && IsValid(Item) && IsValid(Item->Mesh))
         {
+            SpawnedActor->ItemData = Item;
             SpawnedActor->SetItemMesh(Item->Mesh);
         }
     }
