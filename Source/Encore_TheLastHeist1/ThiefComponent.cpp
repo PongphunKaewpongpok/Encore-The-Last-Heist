@@ -44,10 +44,18 @@ TArray<UItemDataAsset*> UThiefComponent::GetInventory() const
 	return Result;
 }
 
-void UThiefComponent::AddInventory(UItemDataAsset* NewItem)
+void UThiefComponent::AddInventory(UItemDataAsset* Item)
 {
-	if (!IsValid(NewItem)) { return; }
+	if (!IsValid(Item)) return;
 
-	Items.Add(NewItem);
+	Items.Add(Item);
+}
+
+void UThiefComponent::RemoveInventoryAt(const int32 Index)
+{
+	if (Items.IsValidIndex(Index))
+	{
+		Items.RemoveAt(Index);
+	}
 }
 

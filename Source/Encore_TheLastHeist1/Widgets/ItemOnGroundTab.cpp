@@ -33,3 +33,16 @@ void UItemOnGroundTab::RemoveItemBarAt_Implementation(int Index)
 }
 
 
+bool UItemOnGroundTab::IsEmpty_Implementation()
+{
+	return true;
+}
+
+void UItemOnGroundTab::UpdateSelectingItem_Implementation()
+{
+}
+
+AInteractableActor* UItemOnGroundTab::GetSelectedInteractableActor_Implementation()
+{
+	return nullptr;
+}

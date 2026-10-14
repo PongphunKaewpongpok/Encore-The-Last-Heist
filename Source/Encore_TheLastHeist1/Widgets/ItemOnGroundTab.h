@@ -31,7 +31,13 @@ public:
     void RemoveItemBar(AInteractableActor* InteractableActor);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void RemoveItemBarAt(int32 Index);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void UpdateSelectingItem();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
 	UItemDataAsset* GetSelectedItemData();
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
+	AInteractableActor* GetSelectedInteractableActor();
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
+	bool IsEmpty();
 };

@@ -163,8 +163,23 @@ void AInteractableActor::OnRep_ItemMesh()
 void AInteractableActor::SetItemMesh(UStaticMesh* NewMesh)
 {
 	if (!HasAuthority()) return;
+	
 	ReplicatedItemMesh = NewMesh;
-
 	OnRep_ItemMesh();
+}
+
+void AInteractableActor::Interact(AThiefCharacter* Target)
+{
+	if (!HasAuthority()) return;
+	
+	Target->Multicast_RemoveOnGroundItem(this);
+	Destroy();
+}
+
+bool AInteractableActor::IsCanCollect(AThiefCharacter* Target) const
+{
+	if (!IsValid(Target) || !IsValid(CollectableCollision)) return false;
+
+	return CollectableCollision->IsOverlappingActor(Target);
 }
 

@@ -17,6 +17,7 @@
 #include "Perception/AISense_Sight.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ThiefPlayerController.h"
 
 
 
@@ -48,6 +49,12 @@ void AThiefCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 		
 		// Kicking
 		EnhancedInputComponent->BindAction(KickAction, ETriggerEvent::Started, this, &AThiefCharacter::DoKick);
+	
+		// Mouse Wheel
+		EnhancedInputComponent->BindAction(MouseWheelAction, ETriggerEvent::Triggered, this, &AThiefCharacter::OnMouseWheel);
+		
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AThiefCharacter::DoInteract);
 	}
 	else
 	{
@@ -66,6 +73,37 @@ void AThiefCharacter::DoKick(const FInputActionValue& Value)
 {
 	ServerKick();
 }
+
+void AThiefCharacter::OnMouseWheel(const FInputActionValue& Value)
+{
+	if (!IsLocallyControlled()) return;
+	
+	const float WheelValue = Value.Get<float>();
+	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(GetController());
+	
+	if (WheelValue > 0.0f)
+	{
+		// Mouse Wheel Up
+		TargetPC->ItemOnGroundTabWidget->ItemBarScrollingUp();
+	}
+	else if (WheelValue < 0.0f)
+	{
+		// Mouse Wheel Down
+		TargetPC->ItemOnGroundTabWidget->ItemBarScrollingDown();
+	}
+}
+
+void AThiefCharacter::DoInteract(const FInputActionValue& Value)
+{
+	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(GetController());
+	AInteractableActor* TargetItem = TargetPC->ItemOnGroundTabWidget->GetSelectedInteractableActor();
+	
+	TargetPC->ItemOnGroundTabWidget->CollectItem();
+	ServerInteract(TargetItem);
+}
+
+
+
 
 void AThiefCharacter::UpdateSprint()
 {
@@ -193,6 +231,35 @@ void AThiefCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 	
 	StartRolling();
+}
+
+void AThiefCharacter::ServerInteract_Implementation(AInteractableActor* TargetItem)
+{
+	if (!TargetItem) return;
+	if (!TargetItem->IsCanCollect(this)) return;
+	
+	ThiefComponent->AddInventory(TargetItem->ItemData);
+	TargetItem->Interact(this);
+}
+
+bool AThiefCharacter::ServerInteract_Validate(AInteractableActor* TargetItem)
+{
+	return true;
+}
+
+void AThiefCharacter::Multicast_RemoveOnGroundItem_Implementation(AInteractableActor* InteractableActor)
+{
+	InteractableActor->OnEndOverlapCollectable(
+		nullptr,
+		this,
+		nullptr,
+		0
+	);
+}
+
+void AThiefCharacter::DropItem(const int32 Index)
+{
+	ThiefComponent->RemoveInventoryAt(Index);
 }
 
 void AThiefCharacter::DoMove(float Right, float Forward)

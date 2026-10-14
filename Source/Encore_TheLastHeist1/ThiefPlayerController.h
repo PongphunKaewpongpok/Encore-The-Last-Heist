@@ -23,8 +23,6 @@ protected:
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UItemOnGroundTab> ItemOnGroundTabWidgetClass;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UItemDetailBar> ItemDetailBarWidgetClass;
 	
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UItemOnGroundTab> ItemOnGroundTabWidget;

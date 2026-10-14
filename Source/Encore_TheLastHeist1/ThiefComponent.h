@@ -32,5 +32,7 @@ public:
 	TArray<UItemDataAsset*> GetInventory() const;
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	void AddInventory(UItemDataAsset* NewItem);
+	void AddInventory(UItemDataAsset* Item);
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	void RemoveInventoryAt(const int32 Index);
 };

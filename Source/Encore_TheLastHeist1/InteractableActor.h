@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ItemDataAsset.h"
+#include "ThiefCharacter.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -61,5 +62,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UMaterialInterface> HighlightMaterial;
 	
-	
+	void Interact(AThiefCharacter* Target);
+	bool IsCanCollect(AThiefCharacter* Target) const;
 };

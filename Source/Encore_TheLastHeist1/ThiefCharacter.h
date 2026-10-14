@@ -8,6 +8,9 @@
 #include "Encore_TheLastHeist1Character.h"
 #include "ThiefCharacter.generated.h"
 
+
+class AInteractableActor;
+
 /**
  * 
  */
@@ -30,9 +33,18 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* SprintAction;
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* KickAction;
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* MouseWheelAction;
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* InteractAction;
 	
 	void ToggleSprint(const FInputActionValue& Value);
 	void DoKick(const FInputActionValue& Value);
+	void OnMouseWheel(const FInputActionValue& Value);
+	void DoInteract(const FInputActionValue& Value);
+	
 	void UpdateSprint();
 	const float WalkingSpeed = 100.0f;
 	const float RunningSpeed = 500.0f;
@@ -44,8 +56,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* RollingAnimation;
 	
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* KickAction;
+	
 	float LastKickTime = -1000.0f;
 	void Knockdown(const FVector& Direction, const float Strength);
 	UPROPERTY(EditAnywhere, Category="Animation")
@@ -64,6 +75,7 @@ protected:
 	class USphereComponent* KickReach;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Kick")
 	TArray<TObjectPtr<UStaticMesh>> KickableMeshes;
+
 	
 public:
 	virtual void DoMove(float Right, float Forward) override;
@@ -73,9 +85,15 @@ public:
 	void ServerSprint(bool bIsSprint);
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerKick();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerInteract(AInteractableActor* TargetItem);
 	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_Knockdown(const FVector& Direction, const float Strength);
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_Kick();
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_RemoveOnGroundItem(AInteractableActor* InteractableActor);
+	
+	void DropItem(const int32 Index);
 };
