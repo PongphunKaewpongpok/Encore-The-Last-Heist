@@ -24,9 +24,11 @@ class ENCORE_THELASTHEIST1_API AThiefCharacter : public AEncore_TheLastHeist1Cha
 public:
 	AThiefCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Tick(float DeltaSeconds) override;
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UThiefComponent> ThiefComponent;
 	
 	const float SprintNoiseRange = 100.0f;

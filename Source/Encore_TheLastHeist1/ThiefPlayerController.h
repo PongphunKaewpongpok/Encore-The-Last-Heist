@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Widgets/ItemOnGroundTab.h"
-#include "Widgets/ItemDetailBar.h"
+#include "Widgets/MainUI.h"
 
 #include "CoreMinimal.h"
 #include "Encore_TheLastHeist1PlayerController.h"
@@ -21,9 +21,32 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
+	virtual void Tick(float DeltaSeconds) override;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UMainUI> MainUIWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UItemOnGroundTab> ItemOnGroundTabWidgetClass;
 	
 	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UMainUI> MainUIWidget;
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UItemOnGroundTab> ItemOnGroundTabWidget;
+	
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_Background;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_Chase;
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> BackgroundAudioComponent;
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> ChaseAudioComponent;
+
+	bool bIsBeingChased = false;
+
+	void SetChaseMusic(bool bStatus);
+	
+	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Audio")
+	void Client_SetChaseMusic(bool bStatus);
 };

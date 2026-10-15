@@ -15,7 +15,6 @@ class ENCORE_THELASTHEIST1_API UItemDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FText ItemName;
 	

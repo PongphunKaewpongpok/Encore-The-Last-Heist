@@ -3,14 +3,32 @@
 
 #include "ThiefComponent.h"
 
+#include "Net/UnrealNetwork.h"
+#include "ThiefPlayerController.h"
+
+void UThiefComponent::OnRep_Items()
+{
+	RefreshInventoryUI();
+}
+
+void UThiefComponent::RefreshInventoryUI()
+{
+	AThiefCharacter* Me = Cast<AThiefCharacter>(GetOwner());
+	if (!Me || !Me->IsLocallyControlled()) return;
+
+	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(Me->GetController());
+	if (!TargetPC || !TargetPC->MainUIWidget) return;
+
+	TargetPC->MainUIWidget->SetWeight(GetWeight());
+	TargetPC->MainUIWidget->SetMoney(GetMoney());
+}
+
 // Sets default values for this component's properties
 UThiefComponent::UThiefComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -32,16 +50,45 @@ void UThiefComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
-TArray<UItemDataAsset*> UThiefComponent::GetInventory() const
+void UThiefComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	TArray<UItemDataAsset*> Result;
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UThiefComponent, Items);
+	DOREPLIFETIME(UThiefComponent, bIsSprint);
+}
 
-	for (const TObjectPtr<UItemDataAsset>& Item : Items)
+TArray<TObjectPtr<UItemDataAsset>>& UThiefComponent::GetInventory()
+{
+	return Items;
+}
+
+float UThiefComponent::GetWeight()
+{
+	float TotalWeight = 0.0f;
+
+	for (UItemDataAsset* Item : GetInventory())
 	{
-		Result.Add(Item.Get());
+		if (!IsValid(Item)) continue;
+
+		TotalWeight += Item->Weight;
 	}
 
-	return Result;
+	return TotalWeight;
+}
+
+int32 UThiefComponent::GetMoney()
+{
+	int32 TotalMoney = 0;
+
+	for (UItemDataAsset* Item : GetInventory())
+	{
+		if (!IsValid(Item)) continue;
+
+		TotalMoney += Item->Price;
+	}
+
+	return TotalMoney;
 }
 
 void UThiefComponent::AddInventory(UItemDataAsset* Item)
@@ -49,6 +96,8 @@ void UThiefComponent::AddInventory(UItemDataAsset* Item)
 	if (!IsValid(Item)) return;
 
 	Items.Add(Item);
+	
+	RefreshInventoryUI();
 }
 
 void UThiefComponent::RemoveInventoryAt(const int32 Index)

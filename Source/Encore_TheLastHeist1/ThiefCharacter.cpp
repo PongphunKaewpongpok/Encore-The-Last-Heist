@@ -18,6 +18,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ThiefPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 
 
@@ -26,7 +27,8 @@
 AThiefCharacter::AThiefCharacter()
 {
 	ThiefComponent = CreateDefaultSubobject<UThiefComponent>(TEXT("ThiefComponent"));
-
+	ThiefComponent->SetIsReplicated(true);
+	
 	KickReach = CreateDefaultSubobject<USphereComponent>(TEXT("KickReach"));
 	KickReach->SetupAttachment(GetMesh());
 	KickReach->SetSphereRadius(KickRange);
@@ -62,11 +64,28 @@ void AThiefCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	}
 }
 
+void AThiefCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AThiefCharacter, ThiefComponent);
+}
+
+void AThiefCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	UpdateSprint();
+}
 
 
 void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 {
-	ServerSprint(Value.Get<bool>());
+	const bool bSprint = Value.Get<bool>();
+
+	ThiefComponent->bIsSprint = bSprint;
+
+	ServerSprint(bSprint);
 }
 
 void AThiefCharacter::DoKick(const FInputActionValue& Value)
@@ -107,38 +126,38 @@ void AThiefCharacter::DoInteract(const FInputActionValue& Value)
 
 void AThiefCharacter::UpdateSprint()
 {
-	if (!bDoAnimationDone) { return; }
+	if (!bDoAnimationDone) return;
 	
 	if (ThiefComponent->bIsSprint)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = RunningSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = RunningSpeed - (RunningSpeed * FMath::Min(FMath::Max(1, ThiefComponent->GetWeight()), 70)/100);
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = WalkingSpeed - (WalkingSpeed * FMath::Min(FMath::Max(1, ThiefComponent->GetWeight()), 50)/100);
 	}
 }
 
 
 void AThiefCharacter::StartRolling()
 {
-	if (!bDoAnimationDone) { return; }
+	if (!bDoAnimationDone) return; 
 
 	FVector Direction = GetVelocity().GetSafeNormal2D();
-	if (Direction.IsNearlyZero()) { return; }
+	if (Direction.IsNearlyZero()) return;
 
 	bDoAnimationDone = false;
 	SetCanJump(false);
 
 	SetActorRotation(Direction.Rotation());
 
-	const float RollingSpeed = GetCharacterMovement()->MaxWalkSpeed + 100.0f;
+	const float RollingSpeed = GetCharacterMovement()->MaxWalkSpeed + 50.0f;
 	GetCharacterMovement()->MaxWalkSpeed = RollingSpeed;
 
 	
 	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance || !RollingAnimation) { return; }
+	if (!AnimInstance || !RollingAnimation) return;
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(
@@ -159,7 +178,7 @@ void AThiefCharacter::StartRolling()
 void AThiefCharacter::Multicast_Kick_Implementation()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance || !KickingAnimation) { return; }
+	if (!AnimInstance || !KickingAnimation) return;
 
 	bDoAnimationDone = false;
 	SetCanJump(false);
@@ -182,7 +201,7 @@ void AThiefCharacter::Multicast_Kick_Implementation()
 void AThiefCharacter::Multicast_Knockdown_Implementation(const FVector& Direction, const float Strength)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance || !GotKnockdownAnimation) { return; }
+	if (!AnimInstance || !GotKnockdownAnimation) return;
 
 	bDoAnimationDone = false;
 	SetCanJump(false);
@@ -208,7 +227,7 @@ void AThiefCharacter::Knockdown(const FVector& Direction, const float Strength)
 	const FVector KnockbackVelocity = Direction.GetSafeNormal() * Strength;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance || !GotKnockdownAnimation) { return; }
+	if (!AnimInstance || !GotKnockdownAnimation) return;
 	
 	LaunchCharacter(
 		KnockbackVelocity,
@@ -221,8 +240,6 @@ void AThiefCharacter::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted
 {
 	bDoAnimationDone = true;
 	SetCanJump(true);
-
-	UpdateSprint();
 }
 
 
@@ -239,6 +256,7 @@ void AThiefCharacter::ServerInteract_Implementation(AInteractableActor* TargetIt
 	if (!TargetItem->IsCanCollect(this)) return;
 	
 	ThiefComponent->AddInventory(TargetItem->ItemData);
+	
 	TargetItem->Interact(this);
 }
 
@@ -280,11 +298,11 @@ void AThiefCharacter::DoMove(float Right, float Forward)
 
 void AThiefCharacter::ServerKick_Implementation()
 {
-	if (!bDoAnimationDone) { return; }
-	if (GetCharacterMovement()->IsFalling()) { return; }
+	if (!bDoAnimationDone) return;
+	if (GetCharacterMovement()->IsFalling()) return;
 	
 	const float Now = GetWorld()->GetTimeSeconds();
-	if (Now - LastKickTime < KickCooldown) { return; }
+	if (Now - LastKickTime < KickCooldown) return;
 	LastKickTime = Now;
 	
 	Multicast_Kick();
@@ -328,7 +346,6 @@ bool AThiefCharacter::ServerKick_Validate()
 void AThiefCharacter::ServerSprint_Implementation(bool bIsSprint)
 {
 	ThiefComponent->bIsSprint = bIsSprint;
-	UpdateSprint();
 }
 
 bool AThiefCharacter::ServerSprint_Validate(bool bIsSprint)
