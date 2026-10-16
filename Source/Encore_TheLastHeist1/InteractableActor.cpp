@@ -93,12 +93,14 @@ AInteractableActor::AInteractableActor()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	
+	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(SceneRoot);
 	
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	SetRootComponent(StaticMesh);
+	StaticMesh->SetupAttachment(SceneRoot);
 
 	HighlightCollision = CreateDefaultSubobject<USphereComponent>(TEXT("HighlightCollision"));
-	HighlightCollision->SetupAttachment(StaticMesh);
+	HighlightCollision->SetupAttachment(SceneRoot);
 	HighlightCollision->SetSphereRadius(750.0f);
 	HighlightCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	HighlightCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -114,7 +116,7 @@ AInteractableActor::AInteractableActor()
 	);
 	
 	CollectableCollision = CreateDefaultSubobject<USphereComponent>(TEXT("CollectableCollision"));
-	CollectableCollision->SetupAttachment(StaticMesh);
+	CollectableCollision->SetupAttachment(SceneRoot);
 	CollectableCollision->SetSphereRadius(150.0f);
 	CollectableCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollectableCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -157,14 +159,16 @@ void AInteractableActor::OnRep_ItemMesh()
 	if (IsValid(StaticMesh))
 	{
 		StaticMesh->SetStaticMesh(ReplicatedItemMesh);
+		StaticMesh->SetRelativeScale3D(FVector(ReplicatedScale, ReplicatedScale, ReplicatedScale));
 	}
 }
 
-void AInteractableActor::SetItemMesh(UStaticMesh* NewMesh)
+void AInteractableActor::SetItemMesh(UStaticMesh* NewMesh, const float Scale)
 {
 	if (!HasAuthority()) return;
 	
 	ReplicatedItemMesh = NewMesh;
+	ReplicatedScale = Scale;
 	OnRep_ItemMesh();
 }
 

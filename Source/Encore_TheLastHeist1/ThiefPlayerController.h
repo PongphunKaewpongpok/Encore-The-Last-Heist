@@ -35,11 +35,15 @@ public:
 	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-	TObjectPtr<USoundBase> Sound_Background;
+	TObjectPtr<USoundBase> Sound_MusicBackground;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_AmbienceBackground;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	TObjectPtr<USoundBase> Sound_Chase;
 	UPROPERTY()
-	TObjectPtr<UAudioComponent> BackgroundAudioComponent;
+	TObjectPtr<UAudioComponent> MusicBackgroundAudioComponent;
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> AmbienceBackgroundAudioComponent;
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> ChaseAudioComponent;
 

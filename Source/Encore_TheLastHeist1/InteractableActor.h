@@ -55,9 +55,11 @@ public:
 	
 	UFUNCTION()
 	void OnRep_ItemMesh();
-	void SetItemMesh(UStaticMesh* NewMesh);
+	void SetItemMesh(UStaticMesh* NewMesh, const float Scale);
 	UPROPERTY(ReplicatedUsing = OnRep_ItemMesh)
 	TObjectPtr<UStaticMesh> ReplicatedItemMesh;
+	UPROPERTY(Replicated)
+	float ReplicatedScale;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UMaterialInterface> HighlightMaterial;

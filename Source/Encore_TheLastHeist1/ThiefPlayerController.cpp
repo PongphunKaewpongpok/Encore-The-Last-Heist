@@ -43,12 +43,12 @@ void AThiefPlayerController::BeginPlay()
 	
 	
 
-	if (Sound_Background)
+	if (Sound_MusicBackground)
 	{
-		BackgroundAudioComponent =
+		MusicBackgroundAudioComponent =
 			UGameplayStatics::SpawnSound2D(
 				this,
-				Sound_Background,
+				Sound_MusicBackground,
 				0.0f,
 				1.0f,
 				0.0f,
@@ -57,9 +57,29 @@ void AThiefPlayerController::BeginPlay()
 				false
 			);
 
-		if (BackgroundAudioComponent)
+		if (MusicBackgroundAudioComponent)
 		{
-			BackgroundAudioComponent->SetVolumeMultiplier(0.25f);
+			MusicBackgroundAudioComponent->SetVolumeMultiplier(0.15f);
+		}
+	}
+	
+	if (Sound_AmbienceBackground)
+	{
+		AmbienceBackgroundAudioComponent =
+			UGameplayStatics::SpawnSound2D(
+				this,
+				Sound_AmbienceBackground,
+				0.0f,
+				1.0f,
+				0.0f,
+				nullptr,
+				true,
+				false
+			);
+
+		if (AmbienceBackgroundAudioComponent)
+		{
+			AmbienceBackgroundAudioComponent->SetVolumeMultiplier(0.1f);
 		}
 	}
 }
@@ -104,19 +124,19 @@ void AThiefPlayerController::Tick(float DeltaSeconds)
 
 	if (!IsLocalController()) return;
 
-	const float TargetBackgroundVolume = bIsBeingChased ? 0.0f : 0.25f;
-	const float TargetChaseVolume = bIsBeingChased ? 0.25f : 0.0f;
+	const float TargetBackgroundVolume = bIsBeingChased ? 0.0f : 0.15f;
+	const float TargetChaseVolume = bIsBeingChased ? 0.15f : 0.0f;
 
-	if (IsValid(BackgroundAudioComponent))
+	if (IsValid(MusicBackgroundAudioComponent))
 	{
-		const float CurrentVolume = BackgroundAudioComponent->VolumeMultiplier;
+		const float CurrentVolume = MusicBackgroundAudioComponent->VolumeMultiplier;
 		const float NewVolume = FMath::FInterpTo(
 			CurrentVolume,
 			TargetBackgroundVolume,
 			DeltaSeconds,
 			0.5f
 		);
-		BackgroundAudioComponent->SetVolumeMultiplier(NewVolume);
+		MusicBackgroundAudioComponent->SetVolumeMultiplier(NewVolume);
 	}
 
 	if (IsValid(ChaseAudioComponent))

@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "InteractableActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "ProfilingDebugging/CookStats.h"
 
 void AEncore_TheLastHeist1GameMode::BeginPlay()
 {
@@ -69,18 +70,25 @@ void AEncore_TheLastHeist1GameMode::SpawnRandomItems(const int SpawnCount)
 
         UItemDataAsset* Item = SpawnableItems[FMath::RandRange(0, SpawnableItems.Num() - 1)];
         if (!Item || !Item->Mesh) continue;
-
-        AInteractableActor* SpawnedActor =
-            GetWorld()->SpawnActor<AInteractableActor>(
-                InteractableClass,
-                Hit.Location + FVector(0.0f, 0.0f, 5.0f),
-                FRotator::ZeroRotator
-            );
         
-        if (IsValid(SpawnedActor) && IsValid(Item) && IsValid(Item->Mesh))
-        {
-            SpawnedActor->ItemData = Item;
-            SpawnedActor->SetItemMesh(Item->Mesh);
-        }
+        SpawnItem(Hit.Location+FVector(0.0f, 0.0f, 5.0f), Item);
+    }
+}
+
+void AEncore_TheLastHeist1GameMode::SpawnItem(const FVector& Location, UItemDataAsset* Item)
+{
+    if (!Item || !Item->Mesh) return;
+
+    AInteractableActor* SpawnedActor =
+        GetWorld()->SpawnActor<AInteractableActor>(
+            InteractableClass,
+            Location,
+            FRotator::ZeroRotator
+        );
+    
+    if (IsValid(SpawnedActor) && IsValid(Item) && IsValid(Item->Mesh))
+    {
+        SpawnedActor->ItemData = Item;
+        SpawnedActor->SetItemMesh(Item->Mesh, Item->Scale);
     }
 }

@@ -29,5 +29,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Scale = 1.0f;
 	
 };
