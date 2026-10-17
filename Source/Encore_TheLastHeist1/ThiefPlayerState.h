@@ -18,7 +18,6 @@ public:
 	AThiefPlayerState();
 
 protected:
-	
 	UPROPERTY(ReplicatedUsing = OnRep_Money, BlueprintReadOnly, Category = "Player Data")
 	int32 Money = 0;
 	UFUNCTION()
@@ -30,10 +29,13 @@ protected:
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	
+	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMoneyChanged);
 	UPROPERTY(BlueprintAssignable, Category = "Player Data")
 	FOnMoneyChanged OnMoneyChanged;
 	
+	void UpdateLeaderboard();
 	
 	UFUNCTION(BlueprintCallable, Category = "Player Data")
 	int32 GetMoney() const { return Money; }

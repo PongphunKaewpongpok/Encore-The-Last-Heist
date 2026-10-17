@@ -8,6 +8,8 @@
 #include "InteractableActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "ProfilingDebugging/CookStats.h"
+#include "TimerManager.h"
+#include "Encore_TheLastHeist1GameState.h"
 
 void AEncore_TheLastHeist1GameMode::BeginPlay()
 {

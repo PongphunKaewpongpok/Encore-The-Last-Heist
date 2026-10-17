@@ -21,16 +21,19 @@ class ENCORE_THELASTHEIST1_API UMainUI : public UUserWidget
 	
 	int32 LastTimeLeftSecond = -1;
 	
+protected:
+	virtual void NativeConstruct() override;
+	
 public:
 	void BindPlayerStates();
 	UFUNCTION()
 	void HandleMoneyChanged();
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UVerticalBox> LeaderboardList;
-	UPROPERTY(EditDefaultsOnly, Category = "Leaderboard")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UThiefLeaderboardBar> ThiefLeaderboardBarClass;
-	UFUNCTION(BlueprintCallable, Category = "Leaderboard")
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void RefreshLeaderboard();
 
 
@@ -39,7 +42,7 @@ public:
 	
 	
 	
-	UPROPERTY( BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> TimeLeftText;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
@@ -47,11 +50,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> MoneyValueText;
 	UPROPERTY( BlueprintReadOnly, meta = (BindWidget), Category = "UI")
-	TObjectPtr<UTextBlock> BankMoneyValueText;
+	TObjectPtr<UTextBlock> StorageMoneyValueText;
 	
 	void SetWeight(const float Weight) const;
 	void SetMoney(const int32 Money) const;
-	void SetBankMoney(const int32 BankMoney) const;
+	void SetStorageMoney(const int32 BankMoney) const;
 	
 	void SetTimeLeft(const float RemainingTime);
 	

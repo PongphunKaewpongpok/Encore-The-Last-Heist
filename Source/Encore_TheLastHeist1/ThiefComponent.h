@@ -18,6 +18,12 @@ class ENCORE_THELASTHEIST1_API UThiefComponent : public UActorComponent
 	TArray<TObjectPtr<UItemDataAsset>> Items;
 	UFUNCTION()
 	void OnRep_Items();
+	
+	UPROPERTY(ReplicatedUsing = OnRep_Storage)
+	TArray<TObjectPtr<UItemDataAsset>> Storage;
+	UFUNCTION()
+	void OnRep_Storage();
+	
 	void RefreshInventoryUI();
 
 public:	
@@ -37,9 +43,16 @@ public:
 	float GetWeight();
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	int32 GetMoney();
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	int32 GetStorageMoney();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void AddInventory(UItemDataAsset* Item);
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	void RemoveInventoryAt(const int32 Index);
+	UItemDataAsset* RemoveInventoryAt(const int32 Index);
+	
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	void MoveToStorage(const int32 Index);
+	
+	void UpdatePlayerState();
 };

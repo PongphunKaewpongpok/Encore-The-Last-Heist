@@ -5,8 +5,14 @@
 
 #include "Net/UnrealNetwork.h"
 #include "ThiefPlayerController.h"
+#include "ThiefPlayerState.h"
 
 void UThiefComponent::OnRep_Items()
+{
+	RefreshInventoryUI();
+}
+
+void UThiefComponent::OnRep_Storage()
 {
 	RefreshInventoryUI();
 }
@@ -21,6 +27,7 @@ void UThiefComponent::RefreshInventoryUI()
 
 	TargetPC->MainUIWidget->SetWeight(GetWeight());
 	TargetPC->MainUIWidget->SetMoney(GetMoney());
+	TargetPC->MainUIWidget->SetStorageMoney(GetStorageMoney());
 }
 
 // Sets default values for this component's properties
@@ -91,20 +98,69 @@ int32 UThiefComponent::GetMoney()
 	return TotalMoney;
 }
 
+int32 UThiefComponent::GetStorageMoney()
+{
+	int32 TotalStorageMoney = 0;
+
+	for (UItemDataAsset* Item : Storage)
+	{
+		if (!IsValid(Item)) continue;
+
+		TotalStorageMoney += Item->Price;
+	}
+
+	return TotalStorageMoney;
+}
+
 void UThiefComponent::AddInventory(UItemDataAsset* Item)
 {
+	AThiefCharacter* Me = Cast<AThiefCharacter>(GetOwner());
+	if (!IsValid(Me)) return;
+	if (!Me->HasAuthority()) return;
+	
 	if (!IsValid(Item)) return;
 
 	Items.Add(Item);
+	UpdatePlayerState();
 	
 	RefreshInventoryUI();
 }
 
-void UThiefComponent::RemoveInventoryAt(const int32 Index)
+UItemDataAsset* UThiefComponent::RemoveInventoryAt(const int32 Index)
 {
-	if (Items.IsValidIndex(Index))
-	{
-		Items.RemoveAt(Index);
-	}
+	AThiefCharacter* Me = Cast<AThiefCharacter>(GetOwner());
+	if (!IsValid(Me)) return nullptr;
+	if (!Me->HasAuthority()) return nullptr;
+	
+	if (!Items.IsValidIndex(Index)) return nullptr;
+
+	UItemDataAsset* RemovedItem = Items[Index];
+	Items.RemoveAt(Index);
+	UpdatePlayerState();
+	
+	RefreshInventoryUI();
+
+	return RemovedItem;
+}
+
+void UThiefComponent::MoveToStorage(const int32 Index)
+{
+	UItemDataAsset* TargetItem = Items[Index];
+	Storage.Add(TargetItem);
+	UpdatePlayerState();
+	
+	RefreshInventoryUI();
+}
+
+void UThiefComponent::UpdatePlayerState()
+{
+	AThiefCharacter* Me = Cast<AThiefCharacter>(GetOwner());
+	if (!IsValid(Me)) return;
+	if (!Me->HasAuthority()) return;
+	
+	AThiefPlayerState* PS = Me->GetPlayerState<AThiefPlayerState>();
+	if (!IsValid(PS)) return;
+	
+	PS->SetMoney(GetStorageMoney()+GetMoney());
 }
 

@@ -19,7 +19,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-
+	
 	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly)
 	float RemainingTime = 35.0f;
 	UFUNCTION()

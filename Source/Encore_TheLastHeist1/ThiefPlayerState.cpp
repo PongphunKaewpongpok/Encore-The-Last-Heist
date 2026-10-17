@@ -3,6 +3,7 @@
 
 #include "ThiefPlayerState.h"
 
+#include "ThiefPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 AThiefPlayerState::AThiefPlayerState()
@@ -19,6 +20,8 @@ void AThiefPlayerState::SetMoney(int32 NewMoney)
 
 	OnMoneyChanged.Broadcast();
 	ForceNetUpdate();
+	
+	
 }
 
 void AThiefPlayerState::SetDisplayName(const FText& NewDisplayName)

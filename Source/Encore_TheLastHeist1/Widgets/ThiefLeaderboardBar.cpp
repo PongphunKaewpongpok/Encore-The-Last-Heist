@@ -4,7 +4,9 @@
 #include "Widgets/ThiefLeaderboardBar.h"
 
 #include "Components/TextBlock.h"
+#include "Components/Border.h"
 #include "ThiefPlayerState.h"
+#include "ThiefPlayerController.h"
 
 
 
@@ -12,6 +14,18 @@
 void UThiefLeaderboardBar::Setup(AThiefPlayerState* InPlayerState)
 {
 	PlayerState = InPlayerState;
+	
+	AThiefPlayerController* PC = Cast<AThiefPlayerController>(GetOwningPlayer());
+
+	if (IsValid(PC) && PC->GetPlayerState<AThiefPlayerState>() == PlayerState)
+	{
+		SetBarColor(FLinearColor(0.0f, 0.85f, 0.0f, 0.5f));
+	}
+	else
+	{
+		SetBarColor(FLinearColor(0.086f, 0.086f, 0.086f, 0.5f));
+	}
+	
 	UpdateBar();
 }
 
@@ -35,4 +49,11 @@ void UThiefLeaderboardBar::SetMoney(const int32 Money) const
 	if (!MoneyValueText) return;
 	
 	MoneyValueText->SetText(FText::AsNumber(Money));
+}
+
+void UThiefLeaderboardBar::SetBarColor(const FLinearColor Color) const
+{
+	if (!PlayerBar) return;
+	
+	PlayerBar->SetBrushColor(Color);
 }

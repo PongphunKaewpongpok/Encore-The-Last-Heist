@@ -33,7 +33,6 @@ void AEncore_TheLastHeist1GameState::Tick(float DeltaSeconds)
 
 void AEncore_TheLastHeist1GameState::OnRep_RemainingTime()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Pass"))
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!IsValid(PC)) return;
 
@@ -47,6 +46,7 @@ TArray<AThiefPlayerState*> AEncore_TheLastHeist1GameState::GetLeaderboardPlayers
 {
 	TArray<AThiefPlayerState*> Players;
 
+	UE_LOG(LogTemp, Warning, TEXT("%d"), PlayerArray.Num());
 	for (APlayerState* PS : PlayerArray)
 	{
 		if (AThiefPlayerState* ThiefPS = Cast<AThiefPlayerState>(PS))

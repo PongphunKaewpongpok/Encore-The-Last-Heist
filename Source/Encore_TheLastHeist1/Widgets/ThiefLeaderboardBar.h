@@ -7,6 +7,7 @@
 #include "ThiefLeaderboardBar.generated.h"
 
 class UTextBlock;
+class UBorder;
 /**
  * 
  */
@@ -24,12 +25,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Leaderboard")
 	void UpdateBar();
 	
-	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UBorder> PlayerBar;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> PlayerNameValueText;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> MoneyValueText;
 	
-	void SetPlayerName(const FText PlayerName&) const;
+	void SetPlayerName(const FText& PlayerName) const;
 	void SetMoney(const int32 Money) const;
+	void SetBarColor(const FLinearColor Color) const;
 };

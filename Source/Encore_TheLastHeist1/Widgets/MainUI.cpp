@@ -8,8 +8,22 @@
 #include "Encore_TheLastHeist1GameState.h"
 #include "ThiefPlayerState.h"
 #include "Components/VerticalBox.h"
+#include "TimerManager.h"
 
+FTimerHandle RefreshLeaderboardTimer;
 
+void UMainUI::NativeConstruct()
+{
+	Super::NativeConstruct();
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		RefreshLeaderboardTimer,
+		this,
+		&UMainUI::BindPlayerStates,
+		0.5f,
+		false
+	);
+}
 
 void UMainUI::BindPlayerStates()
 {
@@ -28,6 +42,8 @@ void UMainUI::BindPlayerStates()
 			);
 		}
 	}
+	
+	RefreshLeaderboard();
 }
 
 void UMainUI::HandleMoneyChanged()
@@ -38,9 +54,10 @@ void UMainUI::HandleMoneyChanged()
 
 void UMainUI::RefreshLeaderboard()
 {
+	
 	if (!IsValid(LeaderboardList) || !IsValid(ThiefLeaderboardBarClass)) return;
 
-	AEncore_TheLastHeist1GameState* GS = GetWorld()->GetGameState< AEncore_TheLastHeist1GameState>();
+	AEncore_TheLastHeist1GameState* GS = GetWorld()->GetGameState<AEncore_TheLastHeist1GameState>();
 	if (!IsValid(GS)) return;
 
 	LeaderboardList->ClearChildren();
@@ -48,26 +65,32 @@ void UMainUI::RefreshLeaderboard()
 	TArray<AThiefPlayerState*> Players = GS->GetLeaderboardPlayers();
 
 	Players.Sort([](const AThiefPlayerState& A, const AThiefPlayerState& B)
-		{
-			return A.GetMoney() > B.GetMoney();
-		}
-	);
-
-	for (const AThiefPlayerState* PS : Players)
 	{
-		if (!IsValid(PS)) continue;
+		return A.GetMoney() > B.GetMoney();
+	});
 
-		UThiefLeaderboardBar* ThiefPlayerBar = CreateWidget<UThiefLeaderboardBar>(
-			GetOwningPlayer(),
-			ThiefLeaderboardBarClass
-		);
-
-		if (IsValid(ThiefPlayerBar))
+	for (AThiefPlayerState* PS : Players)
+	{
+		if (!IsValid(PS))
 		{
-			LeaderboardList->AddChild(ThiefPlayerBar);
-			ThiefPlayerBar->SetMoney(PS->GetMoney());
-			ThiefPlayerBar->SetPlayerName(PS->());
+			continue;
 		}
+
+		UThiefLeaderboardBar* ThiefPlayerBar =
+			CreateWidget<UThiefLeaderboardBar>(
+				GetOwningPlayer(),
+				ThiefLeaderboardBarClass
+			);
+
+		if (!IsValid(ThiefPlayerBar))
+		{
+			continue;
+		}
+
+		ThiefPlayerBar->Setup(PS);
+		ThiefPlayerBar->SetPlayerName(PS->GetDisplayName());
+
+		LeaderboardList->AddChild(ThiefPlayerBar);
 	}
 }
 
@@ -96,11 +119,11 @@ void UMainUI::SetMoney(const int32 Money) const
 	MoneyValueText->SetText(FText::AsNumber(Money));
 }
 
-void UMainUI::SetBankMoney(const int32 BankMoney) const
+void UMainUI::SetStorageMoney(const int32 StorageMoney) const
 {
-	if (!BankMoneyValueText) return;
+	if (!StorageMoneyValueText) return;
 	
-	BankMoneyValueText->SetText(FText::AsNumber(BankMoney));
+	StorageMoneyValueText->SetText(FText::AsNumber(StorageMoney));
 }
 
 void UMainUI::SetTimeLeft(const float RemainingTime)
@@ -121,7 +144,14 @@ void UMainUI::SetTimeLeft(const float RemainingTime)
 		
 		if (LastTimeLeftSecond != TotalSeconds)
 		{
-			UGameplayStatics::PlaySound2D(this, Sound_ClockTick);
+			const float Progress = 1.0f - (TotalSeconds / 30.0f);
+			const float Volume = FMath::Lerp(0.1f, 1.0f, FMath::Pow(Progress, 2.0f));
+
+			UGameplayStatics::PlaySound2D(
+				this,
+				Sound_ClockTick,
+				Volume
+			);
 		}
 	}
 	else
