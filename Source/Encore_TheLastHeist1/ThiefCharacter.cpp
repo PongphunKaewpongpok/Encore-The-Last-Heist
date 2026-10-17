@@ -3,22 +3,21 @@
 
 #include "ThiefCharacter.h"
 #include "Engine/LocalPlayer.h"
-#include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Encore_TheLastHeist1.h"
 #include "Perception/AISense_Hearing.h"
-#include "Perception/AISense_Damage.h"
-#include "Perception/AISense_Sight.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ThiefPlayerController.h"
+#include "ThiefPlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/WidgetComponent.h"
+#include "Widgets/PlayerHeadNametag.h"
+
 
 
 
@@ -37,6 +36,13 @@ AThiefCharacter::AThiefCharacter()
 	KickReach->SetCollisionResponseToAllChannels(ECR_Ignore);
 	KickReach->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	KickReach->SetGenerateOverlapEvents(true);
+	
+	NameWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("NametagWidgetComponent"));
+	NameWidgetComponent->SetupAttachment(GetMesh());
+	NameWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, 175.f));
+	NameWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	NameWidgetComponent->SetDrawSize(FVector2D(200.f, 50.f));
+	NameWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AThiefCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -76,6 +82,41 @@ void AThiefCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	
 	UpdateSprint();
+	UpdateNameVisibility();
+}
+
+void AThiefCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (NameWidgetComponent && PlayerNameWidgetClass)
+	{
+		NameWidgetComponent->SetWidgetClass(
+			PlayerNameWidgetClass
+		);
+
+		NameWidgetComponent->InitWidget();
+	}
+
+	UpdatePlayerNameWidget();
+}
+
+void AThiefCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	UE_LOG(LogTemp, Warning,
+		TEXT("OnRep_PlayerState: %s"),
+		*GetNameSafe(GetPlayerState()));
+
+	UpdatePlayerNameWidget();
+}
+
+void AThiefCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	UpdatePlayerNameWidget();
 }
 
 
@@ -328,7 +369,6 @@ void AThiefCharacter::ServerKick_Implementation()
 		const FVector Dir = To.GetSafeNormal();
 		if (FVector::DotProduct(Forward, Dir) < CosThresh) continue;
 		
-		// Target: Player
 		if (AThiefCharacter* Target = Cast<AThiefCharacter>(T))
 		{
 			Target->Multicast_Knockdown(Forward, KickStrength);
@@ -353,3 +393,58 @@ bool AThiefCharacter::ServerSprint_Validate(bool bIsSprint)
 	return true;
 }
 
+void AThiefCharacter::UpdatePlayerNameWidget()
+{
+	if (!IsValid(NameWidgetComponent))
+		return;
+
+	NameWidgetComponent->InitWidget();
+
+	AThiefPlayerState* PS =
+		GetPlayerState<AThiefPlayerState>();
+
+	UPlayerHeadNametag* NameWidget =
+		Cast<UPlayerHeadNametag>(
+			NameWidgetComponent->GetUserWidgetObject()
+		);
+
+	if (!IsValid(PS))
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("PlayerState is NULL: %s"),
+			*GetNameSafe(this));
+		return;
+	}
+
+	if (!IsValid(NameWidget))
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("NameWidget is NULL: %s"),
+			*GetNameSafe(this));
+		return;
+	}
+
+	NameWidget->SetDisplayName(PS->GetDisplayName());
+}
+
+void AThiefCharacter::UpdateNameVisibility()
+{
+	if (!IsValid(NameWidgetComponent)) return;
+
+	APawn* LocalPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (!IsValid(LocalPawn)) return;
+
+	if (LocalPawn == this)
+	{
+		NameWidgetComponent->SetVisibility(false);
+		return;
+	}
+
+	const float DistanceSquared = FVector::DistSquared(
+		LocalPawn->GetActorLocation(),
+		GetActorLocation()
+	);
+
+	const bool bShouldShow = DistanceSquared <= FMath::Square(NameVisibleDistance);
+	NameWidgetComponent->SetVisibility(bShouldShow);
+}

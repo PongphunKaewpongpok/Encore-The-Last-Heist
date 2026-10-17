@@ -10,6 +10,8 @@
 
 
 class AInteractableActor;
+class UWidgetComponent;
+class UPlayerNameWidget;
 
 /**
  * 
@@ -26,8 +28,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
+	virtual void OnRep_PlayerState() override;
+    virtual void PossessedBy(AController* NewController) override;
 	
 protected:
+	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UThiefComponent> ThiefComponent;
 	
@@ -78,6 +84,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Kick")
 	TArray<TObjectPtr<UStaticMesh>> KickableMeshes;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Name")
+	TObjectPtr<UWidgetComponent> NameWidgetComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Name")
+	TSubclassOf<UUserWidget> PlayerNameWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Name")
+	float NameVisibleDistance = 750.0f;
+
+	void UpdatePlayerNameWidget();
+	void UpdateNameVisibility();
 	
 public:
 	virtual void DoMove(float Right, float Forward) override;
