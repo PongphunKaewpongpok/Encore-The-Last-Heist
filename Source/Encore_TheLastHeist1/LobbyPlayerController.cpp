@@ -6,6 +6,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 #include "Camera/CameraActor.h"
+#include "LobbyPlayerState.h"
+#include "LobbyGameMode.h"
+#include "LobbyTextRenderActor.h"
+#include "LobbyGameState.h"
 
 
 FTimerHandle DummyTimerHandle;
@@ -14,11 +18,9 @@ FTimerHandle DummyTimerHandle;
 void ALobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (!IsLocalController()) return;
 	
-	
-
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
@@ -65,6 +67,19 @@ void ALobbyPlayerController::BeginPlay()
 	);
 	
 	
+	if (LobbyMainUIWidgetClass)
+	{
+		LobbyMainUIWidget = CreateWidget<ULobbyMainUI>(
+			this,
+			LobbyMainUIWidgetClass
+		);
+
+		if (LobbyMainUIWidget)
+		{
+			LobbyMainUIWidget->AddToViewport();
+		}
+	}
+	
 	
 	if (Sound_LobbyMusic)
 	{
@@ -78,6 +93,34 @@ void ALobbyPlayerController::BeginPlay()
 			true,
 			false
 		);
+	}
+}
+
+void ALobbyPlayerController::OnLeftClick()
+{
+	FHitResult Hit;
+
+	if (GetHitResultUnderCursor(
+		ECC_Visibility,
+		false,
+		Hit))
+	{
+		AActor* HitActor = Hit.GetActor();
+
+		if (IsValid(HitActor))
+		{
+			ALobbyTextRenderActor* TargetTextRender = Cast<ALobbyTextRenderActor>(HitActor);
+			if (!TargetTextRender) return;
+			
+			if (HasAuthority())
+			{
+				ServerStart();
+			}
+			else
+			{
+				ServerReady();
+			}
+		}
 	}
 }
 
@@ -149,4 +192,63 @@ void ALobbyPlayerController::SwitchLight()
 		DummysArray[0]->GetRootComponent()->SetVisibility(false, true);
 		DummysArray[1]->GetRootComponent()->SetVisibility(true, false);
 	}
+}
+
+void ALobbyPlayerController::GameStarting()
+{
+	if (!IsLocalController()) return;
+
+	LobbyMusicAudioComponent->Stop();
+	
+	bShowMouseCursor = false;
+	bEnableClickEvents = false;
+	bEnableMouseOverEvents = false;
+	SetInputMode(FInputModeGameOnly());
+}
+
+void ALobbyPlayerController::ServerStart_Implementation()
+{
+	if (!HasAuthority()) return;
+	
+	ALobbyGameMode* GM = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode());
+	if (!IsValid(GM)) return;
+
+	ALobbyPlayerState* PS = GetPlayerState<ALobbyPlayerState>();
+	PS->IsReady = true;
+	
+	ALobbyGameState* GS = GetWorld()->GetGameState<ALobbyGameState>();
+	GS->bIsStarting = true;
+    GS->ForceNetUpdate();
+	
+	GameStarting();
+	
+	GM->TravelToInGame();
+}
+
+bool ALobbyPlayerController::ServerStart_Validate()
+{
+	return true;
+}
+
+void ALobbyPlayerController::ServerReady_Implementation()
+{
+	ALobbyPlayerState* PS = GetPlayerState<ALobbyPlayerState>();
+	PS->IsReady = true;
+}
+
+bool ALobbyPlayerController::ServerReady_Validate()
+{
+	return true;
+}
+
+void ALobbyPlayerController::ServerSetDisplayName_Implementation(const FText& DisplayName)
+{
+	ALobbyPlayerState* PS = GetPlayerState<ALobbyPlayerState>();
+	
+	FText TrimmedText = FText::TrimPrecedingAndTrailing(DisplayName);
+	FString InputString = TrimmedText.ToString();
+	FString LeftString = InputString.Left(MaxDisplayNameLength);
+	FText ResultText = FText::FromString(LeftString);
+	
+	PS->DisplayName = (ResultText.EqualTo(FText::FromString("")) ? FText::FromString("Anonymous") : ResultText);
 }

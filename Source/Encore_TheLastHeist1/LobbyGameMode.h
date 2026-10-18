@@ -14,6 +14,12 @@ class ENCORE_THELASTHEIST1_API ALobbyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+	
 protected:
 	virtual void BeginPlay() override;
+	
+public:
+	ALobbyGameMode();
+	
+	void TravelToInGame();
 };

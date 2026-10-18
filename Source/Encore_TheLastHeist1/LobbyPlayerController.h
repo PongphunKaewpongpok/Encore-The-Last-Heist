@@ -3,11 +3,13 @@
 #pragma once
 
 #include "Components/SpotLightComponent.h"
+#include "Widgets/LobbyMainUI.h"
 
 #include "CoreMinimal.h"
 #include "Encore_TheLastHeist1PlayerController.h"
 #include "LobbyPlayerController.generated.h"
 
+class UInputAction;
 /**
  * 
  */
@@ -15,6 +17,8 @@ UCLASS()
 class ENCORE_THELASTHEIST1_API ALobbyPlayerController : public AEncore_TheLastHeist1PlayerController
 {
 	GENERATED_BODY()
+	
+	int32 MaxDisplayNameLength = 16;
 	
 	UPROPERTY()
 	TObjectPtr<ACameraActor> LobbyCamera;
@@ -36,8 +40,16 @@ class ENCORE_THELASTHEIST1_API ALobbyPlayerController : public AEncore_TheLastHe
 protected:
 	virtual void BeginPlay() override;
 	
+	UFUNCTION(BlueprintCallable)
+	void OnLeftClick();
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	TObjectPtr<ULobbyMainUI> LobbyMainUIWidget;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<ULobbyMainUI> LobbyMainUIWidgetClass;
+	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	TObjectPtr<USoundBase> Sound_LobbyMusic;
@@ -50,4 +62,13 @@ public:
 	USpotLightComponent* RedSpotlight;
 	
 	void SwitchLight();
+	void GameStarting();
+	
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerSetDisplayName(const FText& DisplayName);
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReady();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerStart();
 };

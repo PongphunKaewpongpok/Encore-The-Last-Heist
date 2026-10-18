@@ -54,7 +54,6 @@ void UMainUI::HandleMoneyChanged()
 
 void UMainUI::RefreshLeaderboard()
 {
-	
 	if (!IsValid(LeaderboardList) || !IsValid(ThiefLeaderboardBarClass)) return;
 
 	AEncore_TheLastHeist1GameState* GS = GetWorld()->GetGameState<AEncore_TheLastHeist1GameState>();

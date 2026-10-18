@@ -10,6 +10,9 @@
 #include "Blueprint/UserWidget.h"
 #include "ItemOnGroundTab.generated.h"
 
+
+class UWrapBox;
+class UBorder;
 /**
  * 
  */
@@ -18,26 +21,39 @@ class ENCORE_THELASTHEIST1_API UItemOnGroundTab : public UUserWidget
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UWrapBox> WrapBox;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UBorder> ItemListMenu;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UItemDetailBar> ItemDetailBarClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_CollectItem;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 SelectedSlot = 0;
+	
+	
 	void ItemBarScrollingDown();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ItemBarScrollingUp();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void CollectItem();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AddItemBar(AInteractableActor* InteractableActor);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
     void RemoveItemBar(AInteractableActor* InteractableActor);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void RemoveItemBarAt(int32 Index);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void UpdateSelectingItem();
 	
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
+	UFUNCTION(BlueprintPure)
 	UItemDataAsset* GetSelectedItemData();
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
+	UFUNCTION(BlueprintPure)
 	AInteractableActor* GetSelectedInteractableActor();
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
-	bool IsEmpty();
+	UFUNCTION(BlueprintPure)
+	UItemDetailBar* GetSelectedItemDetailBarWidget();
+	UFUNCTION(BlueprintPure)
+	bool IsEmpty() const;
 };

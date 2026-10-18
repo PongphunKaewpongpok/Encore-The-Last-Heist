@@ -38,8 +38,8 @@ AThiefCharacter::AThiefCharacter()
 	KickReach->SetGenerateOverlapEvents(true);
 	
 	NameWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("NametagWidgetComponent"));
-	NameWidgetComponent->SetupAttachment(GetMesh());
-	NameWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, 175.f));
+	NameWidgetComponent->SetupAttachment(GetMesh(), TEXT("Head"));
+	NameWidgetComponent->SetRelativeLocation(FVector(0.0f, -30.0f, 0.0f));
 	NameWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	NameWidgetComponent->SetDrawSize(FVector2D(200.f, 50.f));
 	NameWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -104,10 +104,6 @@ void AThiefCharacter::BeginPlay()
 void AThiefCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-
-	UE_LOG(LogTemp, Warning,
-		TEXT("OnRep_PlayerState: %s"),
-		*GetNameSafe(GetPlayerState()));
 
 	UpdatePlayerNameWidget();
 }
@@ -400,8 +396,7 @@ void AThiefCharacter::UpdatePlayerNameWidget()
 
 	NameWidgetComponent->InitWidget();
 
-	AThiefPlayerState* PS =
-		GetPlayerState<AThiefPlayerState>();
+	AThiefPlayerState* PS = GetPlayerState<AThiefPlayerState>();
 
 	UPlayerHeadNametag* NameWidget =
 		Cast<UPlayerHeadNametag>(
