@@ -15,39 +15,40 @@ FTimerHandle RefreshLeaderboardTimer;
 void UMainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	GetWorld()->GetTimerManager().SetTimer(
-		RefreshLeaderboardTimer,
-		this,
-		&UMainUI::BindPlayerStates,
-		0.5f,
-		false
-	);
-}
 
-void UMainUI::BindPlayerStates()
-{
 	AEncore_TheLastHeist1GameState* GS = GetWorld()->GetGameState<AEncore_TheLastHeist1GameState>();
 	if (!IsValid(GS)) return;
 
 	for (APlayerState* PS : GS->PlayerArray)
 	{
-		AThiefPlayerState* ThiefPS = Cast<AThiefPlayerState>(PS);
-
-		if (IsValid(ThiefPS))
+		if (AThiefPlayerState* ThiefPS = Cast<AThiefPlayerState>(PS))
 		{
-			ThiefPS->OnMoneyChanged.AddUniqueDynamic(
-				this,
-				&UMainUI::HandleMoneyChanged
-			);
+			BindSinglePlayerState(ThiefPS);
 		}
 	}
-	
+
+	GS->OnThiefPlayerStateAdded.AddUObject(
+		this,
+		&UMainUI::BindSinglePlayerState
+	);
+
 	RefreshLeaderboard();
 }
 
 void UMainUI::HandleMoneyChanged()
 {
+	RefreshLeaderboard();
+}
+
+void UMainUI::BindSinglePlayerState(AThiefPlayerState* ThiefPS)
+{
+	if (!IsValid(ThiefPS)) return;
+
+	ThiefPS->OnMoneyChanged.AddUniqueDynamic(
+		this,
+		&UMainUI::HandleMoneyChanged
+	);
+
 	RefreshLeaderboard();
 }
 

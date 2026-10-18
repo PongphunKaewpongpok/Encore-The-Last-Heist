@@ -25,9 +25,10 @@ protected:
 	virtual void NativeConstruct() override;
 	
 public:
-	void BindPlayerStates();
 	UFUNCTION()
 	void HandleMoneyChanged();
+
+	void BindSinglePlayerState(AThiefPlayerState* ThiefPS);
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UVerticalBox> LeaderboardList;

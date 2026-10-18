@@ -12,6 +12,7 @@
 class AInteractableActor;
 class UWidgetComponent;
 class UPlayerNameWidget;
+class AWeretigerCharacter;
 
 /**
  * 
@@ -95,6 +96,9 @@ protected:
 	void UpdatePlayerNameWidget();
 	void UpdateNameVisibility();
 	
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* DeathAnimation;
+	
 public:
 	virtual void DoMove(float Right, float Forward) override;
 	virtual void Landed(const FHitResult& Hit) override;
@@ -114,4 +118,6 @@ public:
 	void Multicast_RemoveOnGroundItem(AInteractableActor* InteractableActor);
 	
 	void DropItem(const int32 Index);
+	void GotExecuted(AWeretigerCharacter* Weretiger);
+	bool IsDead();
 };

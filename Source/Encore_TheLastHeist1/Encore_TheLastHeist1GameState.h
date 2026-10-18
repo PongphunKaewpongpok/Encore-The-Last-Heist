@@ -16,6 +16,17 @@ class ENCORE_THELASTHEIST1_API AEncore_TheLastHeist1GameState : public AGameStat
 
 public:
 	AEncore_TheLastHeist1GameState();
+	
+	virtual void AddPlayerState(APlayerState* PlayerState) override;
+	virtual void RemovePlayerState(APlayerState* PlayerState) override;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(
+		FOnThiefPlayerStateAdded,
+		AThiefPlayerState*
+	);
+	FOnThiefPlayerStateAdded OnThiefPlayerStateAdded;
+	
+	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	

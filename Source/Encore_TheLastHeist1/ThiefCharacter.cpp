@@ -2,7 +2,6 @@
 
 
 #include "ThiefCharacter.h"
-#include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
@@ -16,8 +15,9 @@
 #include "ThiefPlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Widgets/PlayerHeadNametag.h"
-
+#include "WeretigerCharacter.h"
 
 
 
@@ -118,6 +118,8 @@ void AThiefCharacter::PossessedBy(AController* NewController)
 
 void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	const bool bSprint = Value.Get<bool>();
 
 	ThiefComponent->bIsSprint = bSprint;
@@ -127,12 +129,15 @@ void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 
 void AThiefCharacter::DoKick(const FInputActionValue& Value)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	ServerKick();
 }
 
 void AThiefCharacter::OnMouseWheel(const FInputActionValue& Value)
 {
 	if (!IsLocallyControlled()) return;
+	if (!ThiefComponent->bIsAlive) return;
 	
 	const float WheelValue = Value.Get<float>();
 	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(GetController());
@@ -151,6 +156,8 @@ void AThiefCharacter::OnMouseWheel(const FInputActionValue& Value)
 
 void AThiefCharacter::DoInteract(const FInputActionValue& Value)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(GetController());
 	AInteractableActor* TargetItem = TargetPC->ItemOnGroundTabWidget->GetSelectedInteractableActor();
 	
@@ -164,6 +171,7 @@ void AThiefCharacter::DoInteract(const FInputActionValue& Value)
 void AThiefCharacter::UpdateSprint()
 {
 	if (!bDoAnimationDone) return;
+	if (!ThiefComponent->bIsAlive) return;
 	
 	if (ThiefComponent->bIsSprint)
 	{
@@ -178,7 +186,8 @@ void AThiefCharacter::UpdateSprint()
 
 void AThiefCharacter::StartRolling()
 {
-	if (!bDoAnimationDone) return; 
+	if (!bDoAnimationDone) return;
+	if (!ThiefComponent->bIsAlive) return;
 
 	FVector Direction = GetVelocity().GetSafeNormal2D();
 	if (Direction.IsNearlyZero()) return;
@@ -275,6 +284,8 @@ void AThiefCharacter::Knockdown(const FVector& Direction, const float Strength)
 
 void AThiefCharacter::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	bDoAnimationDone = true;
 	SetCanJump(true);
 }
@@ -291,6 +302,7 @@ void AThiefCharacter::ServerInteract_Implementation(AInteractableActor* TargetIt
 {
 	if (!TargetItem) return;
 	if (!TargetItem->IsCanCollect(this)) return;
+	if (!ThiefComponent->bIsAlive) return;
 	
 	ThiefComponent->AddInventory(TargetItem->ItemData);
 	
@@ -314,11 +326,57 @@ void AThiefCharacter::Multicast_RemoveOnGroundItem_Implementation(AInteractableA
 
 void AThiefCharacter::DropItem(const int32 Index)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	ThiefComponent->RemoveInventoryAt(Index);
+}
+
+void AThiefCharacter::GotExecuted(AWeretigerCharacter* Weretiger)
+{
+	if (!ThiefComponent->bIsAlive) return;
+	
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	
+	ThiefComponent->bIsAlive = false;
+	GetCharacterMovement()->StopMovementImmediately();
+	SetCanJump(false);
+	PC->SetIgnoreMoveInput(true);
+	
+	
+	
+	FVector Start = GetActorLocation();
+	FVector TargetLocation = Weretiger->GetActorLocation();
+
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
+		Start,
+		TargetLocation
+	);
+
+	SetActorRotation(FRotator(
+		0.f,
+		LookAtRotation.Yaw,
+		0.f
+	));
+	
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance) return;
+	
+	if (DeathAnimation)
+	{
+		AnimInstance->Montage_Play(DeathAnimation);
+	}
+}
+
+bool AThiefCharacter::IsDead()
+{
+	return !ThiefComponent->bIsAlive;
 }
 
 void AThiefCharacter::DoMove(float Right, float Forward)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	Super::DoMove(Right, Forward);
 	
 	// SHOULD Binding Notify in future
@@ -337,6 +395,7 @@ void AThiefCharacter::ServerKick_Implementation()
 {
 	if (!bDoAnimationDone) return;
 	if (GetCharacterMovement()->IsFalling()) return;
+	if (!ThiefComponent->bIsAlive) return;
 	
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (Now - LastKickTime < KickCooldown) return;
@@ -381,6 +440,8 @@ bool AThiefCharacter::ServerKick_Validate()
 
 void AThiefCharacter::ServerSprint_Implementation(bool bIsSprint)
 {
+	if (!ThiefComponent->bIsAlive) return;
+	
 	ThiefComponent->bIsSprint = bIsSprint;
 }
 
@@ -391,34 +452,16 @@ bool AThiefCharacter::ServerSprint_Validate(bool bIsSprint)
 
 void AThiefCharacter::UpdatePlayerNameWidget()
 {
-	if (!IsValid(NameWidgetComponent))
-		return;
-
+	if (!IsValid(NameWidgetComponent)) return;
 	NameWidgetComponent->InitWidget();
 
 	AThiefPlayerState* PS = GetPlayerState<AThiefPlayerState>();
 
-	UPlayerHeadNametag* NameWidget =
-		Cast<UPlayerHeadNametag>(
-			NameWidgetComponent->GetUserWidgetObject()
-		);
-
-	if (!IsValid(PS))
-	{
-		UE_LOG(LogTemp, Warning,
-			TEXT("PlayerState is NULL: %s"),
-			*GetNameSafe(this));
-		return;
-	}
-
-	if (!IsValid(NameWidget))
-	{
-		UE_LOG(LogTemp, Warning,
-			TEXT("NameWidget is NULL: %s"),
-			*GetNameSafe(this));
-		return;
-	}
-
+	UPlayerHeadNametag* NameWidget = Cast<UPlayerHeadNametag>(NameWidgetComponent->GetUserWidgetObject());
+	
+	if (!IsValid(PS)) return;
+	if (!IsValid(NameWidget)) return;
+	
 	NameWidget->SetDisplayName(PS->GetDisplayName());
 }
 

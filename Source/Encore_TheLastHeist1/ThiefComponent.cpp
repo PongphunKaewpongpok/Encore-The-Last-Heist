@@ -63,6 +63,7 @@ void UThiefComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	
 	DOREPLIFETIME(UThiefComponent, Items);
 	DOREPLIFETIME(UThiefComponent, bIsSprint);
+	DOREPLIFETIME(UThiefComponent, bIsAlive);
 }
 
 TArray<TObjectPtr<UItemDataAsset>>& UThiefComponent::GetInventory()

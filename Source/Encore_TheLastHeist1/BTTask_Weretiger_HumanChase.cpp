@@ -29,6 +29,16 @@ EBTNodeResult::Type UBTTask_Weretiger_HumanChase::ExecuteTask(UBehaviorTreeCompo
 	if (Target == nullptr) { return EBTNodeResult::Failed; }
 	
 	
+	
+	constexpr float AttackRange = 200.f;
+
+	const float DistanceSquared = FVector::DistSquared(
+		Me->GetActorLocation(),
+		Target->GetActorLocation()
+	);
+	
+	
+	
 	if (Me->GetForm().Equals("Human"))
 	{
 		if (IsOnScreen(Target, Me))
@@ -42,6 +52,11 @@ EBTNodeResult::Type UBTTask_Weretiger_HumanChase::ExecuteTask(UBehaviorTreeCompo
 	}
 	else
 	{
+		if (DistanceSquared <= FMath::Square(AttackRange))
+		{
+			Me->Execute(Target);
+		}
+		
 		AICon->MoveToActor(Target);
 	}
 	

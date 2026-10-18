@@ -37,6 +37,9 @@ public:
 	UPROPERTY(Replicated)
 	bool bIsSprint = false;
 	
+	UPROPERTY(Replicated)
+	bool bIsAlive = true;
+	
 	
 	TArray<TObjectPtr<UItemDataAsset>>& GetInventory();
 	UFUNCTION(BlueprintCallable, Category="Inventory")

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "ThiefCharacter.h"
+
 #include "CoreMinimal.h"
 #include "Encore_TheLastHeist1Character.h"
 #include "WeretigerCharacter.generated.h"
@@ -18,10 +20,10 @@ class ENCORE_THELASTHEIST1_API AWeretigerCharacter : public AEncore_TheLastHeist
 	FString Form = TEXT("Human");
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="Skeletal Mesh")
-	USkeletalMesh* HumanFormMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="Skeletal Mesh")
-	USkeletalMesh* TigerFormMesh;
+	AWeretigerCharacter();
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category ="Skeletal Mesh")
+	USkeletalMeshComponent* TigerMesh;
 
 	
 public:
@@ -32,8 +34,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float TigerFormWanderSpeed = 200.0f;
 	
+	
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* ExecuteAnimation;
+	
 	UFUNCTION(BlueprintPure)
 	FString GetForm();
 	UFUNCTION(BlueprintCallable)
 	void SwitchForm();
+	
+	void Execute(AThiefCharacter* Target);
+	void OnExecuteEnded(UAnimMontage* Montage, bool bInterrupted);
 };
