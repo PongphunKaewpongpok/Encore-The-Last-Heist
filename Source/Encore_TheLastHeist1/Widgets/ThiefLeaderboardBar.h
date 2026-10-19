@@ -8,6 +8,7 @@
 
 class UTextBlock;
 class UBorder;
+class UImage;
 /**
  * 
  */
@@ -31,8 +32,13 @@ public:
 	TObjectPtr<UTextBlock> PlayerNameValueText;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> MoneyValueText;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UImage> RankingIcon;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UImage> DeathIcon;
 	
 	void SetPlayerName(const FText& PlayerName) const;
 	void SetMoney(const int32 Money) const;
 	void SetBarColor(const FLinearColor Color) const;
+	void SetShowDeathIcon(const bool bIsShow) const;
 };

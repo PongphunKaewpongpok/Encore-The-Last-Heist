@@ -3,7 +3,7 @@
 
 #include "ThiefPlayerState.h"
 
-#include "ThiefPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 AThiefPlayerState::AThiefPlayerState()
@@ -18,10 +18,23 @@ void AThiefPlayerState::SetMoney(int32 NewMoney)
 	if (Money == NewMoney) return;
 	Money = NewMoney;
 
-	OnMoneyChanged.Broadcast();
+	OnDataChanged.Broadcast();
 	ForceNetUpdate();
-	
-	
+}
+
+void AThiefPlayerState::SetIsAlive(const bool InIsAlive)
+{
+	if (!HasAuthority()) return;
+
+	if (bIsAlive == InIsAlive) return;
+	bIsAlive = InIsAlive;
+
+	if (!InIsAlive)
+	{
+		PlaySomeoneDeathSound();
+	}
+	OnDataChanged.Broadcast();
+	ForceNetUpdate();
 }
 
 void AThiefPlayerState::SetDisplayName(const FText& NewDisplayName)
@@ -32,9 +45,34 @@ void AThiefPlayerState::SetDisplayName(const FText& NewDisplayName)
 	DisplayName = NewDisplayName;
 }
 
+void AThiefPlayerState::PlaySomeoneDeathSound() const
+{
+	if (IsValid(Sound_PlayerDeath_1))
+	{
+		UGameplayStatics::PlaySound2D(this, Sound_PlayerDeath_1);
+	}
+
+	if (IsValid(Sound_PlayerDeath_2))
+	{
+		UGameplayStatics::PlaySound2D(this, Sound_PlayerDeath_2);
+	}
+	
+	
+}
+
 void AThiefPlayerState::OnRep_Money()
 {
-	OnMoneyChanged.Broadcast();
+	OnDataChanged.Broadcast();
+}
+
+void AThiefPlayerState::OnRep_IsAlive()
+{
+	if (!GetIsAlive())
+	{
+		PlaySomeoneDeathSound();
+	}
+	
+	OnDataChanged.Broadcast();
 }
 
 void AThiefPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -42,5 +80,6 @@ void AThiefPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AThiefPlayerState, Money);
+	DOREPLIFETIME(AThiefPlayerState, bIsAlive);
 	DOREPLIFETIME(AThiefPlayerState, DisplayName);
 }

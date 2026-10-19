@@ -23,5 +23,5 @@ public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 protected:
-	bool IsOnScreen(ACharacter* Me, ACharacter* Target);
+	bool IsPlayerRunningAway(ACharacter* Weretiger, ACharacter* Target) const;
 };

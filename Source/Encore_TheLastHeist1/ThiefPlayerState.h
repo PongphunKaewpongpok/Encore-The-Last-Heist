@@ -23,19 +23,29 @@ protected:
 	UFUNCTION()
 	void OnRep_Money();
 	
+	UPROPERTY(ReplicatedUsing = OnRep_IsAlive, BlueprintReadOnly, Category = "Player Data")
+	bool bIsAlive = true;
+	UFUNCTION()
+	void OnRep_IsAlive();
+	
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player Data")
 	FText DisplayName = FText::FromString("Anonymous");
+	
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_PlayerDeath_1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_PlayerDeath_2;
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	
 	
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMoneyChanged);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDataChanged);
 	UPROPERTY(BlueprintAssignable, Category = "Player Data")
-	FOnMoneyChanged OnMoneyChanged;
+	FOnDataChanged OnDataChanged;
 	
-	void UpdateLeaderboard();
 	
 	UFUNCTION(BlueprintCallable, Category = "Player Data")
 	int32 GetMoney() const { return Money; }
@@ -43,7 +53,14 @@ public:
 	void SetMoney(int32 NewMoney);
 	
 	UFUNCTION(BlueprintCallable, Category = "Player Data")
+	bool GetIsAlive() const { return bIsAlive; }
+	UFUNCTION(BlueprintCallable, Category = "Player Data")
+	void SetIsAlive(const bool InIsAlive);
+
+	UFUNCTION(BlueprintCallable, Category = "Player Data")
 	FText GetDisplayName() const { return DisplayName; }
 	UFUNCTION(BlueprintCallable, Category = "Player Data")
 	void SetDisplayName(const FText& NewDisplayName);
+	
+	void PlaySomeoneDeathSound() const;
 };

@@ -20,9 +20,12 @@ class ENCORE_THELASTHEIST1_API AThiefPlayerController : public AEncore_TheLastHe
 protected:
 	virtual void BeginPlay() override;
 	
+	UFUNCTION()
+	void OnBlackScreenFadeFinished();
+	
 public:
 	virtual void Tick(float DeltaSeconds) override;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UMainUI> MainUIWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
@@ -53,4 +56,9 @@ public:
 	
 	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Audio")
 	void Client_SetChaseMusic(bool bStatus);
+	
+	bool bGameEnd = false;
+	void OnGameEnd();
+	
+	
 };

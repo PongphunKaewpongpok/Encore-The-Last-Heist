@@ -21,10 +21,11 @@ class AEncore_TheLastHeist1GameMode : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 	
+	FTimerHandle ReturnToLobbyTimerHandle;
 public:
-	
 	/** Constructor */
 	AEncore_TheLastHeist1GameMode();
+	void StartCountdownReturnToLobby(const float Duration);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<TObjectPtr<UItemDataAsset>> SpawnableItems;
@@ -37,6 +38,8 @@ public:
 	
 	void SpawnRandomItems(const int SpawnCount);
 	void SpawnItem(const FVector& Location, UItemDataAsset* Item);
+	
+	void TravelToLobby();
 };
 
 

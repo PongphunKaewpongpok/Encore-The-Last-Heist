@@ -16,17 +16,20 @@ class ENCORE_THELASTHEIST1_API AWeretigerCharacter : public AEncore_TheLastHeist
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FString Form = TEXT("Human");
 	
 protected:
 	AWeretigerCharacter();
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category ="Skeletal Mesh")
-	USkeletalMeshComponent* TigerMesh;
 
 	
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category ="Skeletal Mesh")
+	USkeletalMeshComponent* TigerMesh;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float HumanFormSpeed = 125.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -34,9 +37,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float TigerFormWanderSpeed = 200.0f;
 	
+	UPROPERTY(EditDefaultsOnly, Category="AI")
+	FName TargetActorKey = TEXT("TargetActor");
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* StartTranformToTigerAnimation;
+	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ExecuteAnimation;
+	
+	
 	
 	UFUNCTION(BlueprintPure)
 	FString GetForm();
@@ -45,4 +54,10 @@ public:
 	
 	void Execute(AThiefCharacter* Target);
 	void OnExecuteEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnStartTranformToTigerEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_StartTranformToTiger();
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_Execute();
 };

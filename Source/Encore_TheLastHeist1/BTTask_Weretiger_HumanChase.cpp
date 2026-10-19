@@ -8,6 +8,7 @@
 #include "WeretigerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ThiefPlayerController.h"
 
 UBTTask_Weretiger_HumanChase::UBTTask_Weretiger_HumanChase()
 {
@@ -41,75 +42,58 @@ EBTNodeResult::Type UBTTask_Weretiger_HumanChase::ExecuteTask(UBehaviorTreeCompo
 	
 	if (Me->GetForm().Equals("Human"))
 	{
-		if (IsOnScreen(Target, Me))
+		if (IsPlayerRunningAway(Me, Target))
 		{
 			Me->SwitchForm();
 		}
 		else
 		{
-			AICon->MoveToActor(Target);
+			if (DistanceSquared <= FMath::Square(AttackRange))
+			{
+				Me->SwitchForm();
+			}
+			else
+			{
+				AICon->MoveToActor(Target);
+			}
 		}
 	}
 	else
 	{
-		if (DistanceSquared <= FMath::Square(AttackRange))
+		if (IsValid(Me->TigerMesh) && Me->TigerMesh->IsVisible())
 		{
-			Me->Execute(Target);
+			if (DistanceSquared <= FMath::Square(AttackRange))
+			{
+				Me->Execute(Target);
+				BB->ClearValue(TargetActorKey.SelectedKeyName);
+			}
+			else
+			{
+				Me->GetCharacterMovement()->MaxWalkSpeed = Me->TigerFormChaseSpeed;
+				AICon->MoveToActor(Target);
+			}
+			
 		}
-		
-		AICon->MoveToActor(Target);
 	}
 	
 	return EBTNodeResult::Succeeded;
 }
 
-bool UBTTask_Weretiger_HumanChase::IsOnScreen(ACharacter* Me, ACharacter* Target)
+bool UBTTask_Weretiger_HumanChase::IsPlayerRunningAway(ACharacter* Weretiger, ACharacter* Target) const
 {
-	APlayerController* PC = Cast<APlayerController>(Me->GetController());
-	if (PC == nullptr) { return false; }
-	
-	FVector WorldLocation = Me->GetActorLocation();
-	FVector2D ScreenLocation;
-	if (!PC->ProjectWorldLocationToScreen(WorldLocation, ScreenLocation))
-	{
-		return false;
-	}
-	
-	int32 SizeX;
-	int32 SizeY;
-	PC->GetViewportSize(SizeX, SizeY);
+	if (!IsValid(Weretiger) || !IsValid(Target)) return false;
 
-	const bool bOnScreen =
-		ScreenLocation.X >= 0.f &&
-		ScreenLocation.X <= SizeX &&
-		ScreenLocation.Y >= 0.f &&
-		ScreenLocation.Y <= SizeY;
-	
-	if (!bOnScreen) { return false; }
-	
-	
-	
-	FVector CameraLocation;
-	FRotator CameraRotation;
+	FVector AwayDirection = Target->GetActorLocation() - Weretiger->GetActorLocation();
 
-	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	AwayDirection.Z = 0.0f;
+	AwayDirection.Normalize();
 
-	FHitResult Hit;
+	FVector Velocity = Target->GetVelocity();
+	Velocity.Z = 0.0f;
 
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(Me);
+	if (Velocity.SizeSquared() < FMath::Square(100.0f)) return false;
+	Velocity.Normalize();
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		Hit,
-		CameraLocation,
-		Target->GetActorLocation(),
-		ECC_Visibility,
-		Params
-	);
-
-	if (bHit && Hit.GetActor() != Target)
-	{
-		return false;
-	}
-	return true;
+	const float Dot = FVector::DotProduct(Velocity, AwayDirection);
+	return Dot > 0.7f;
 }

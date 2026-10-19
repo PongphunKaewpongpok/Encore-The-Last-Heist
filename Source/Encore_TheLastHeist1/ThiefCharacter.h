@@ -4,6 +4,8 @@
 
 #include "ThiefComponent.h"
 
+#include "PhysicalMaterials/PhysicalMaterial.h"
+
 #include "CoreMinimal.h"
 #include "Encore_TheLastHeist1Character.h"
 #include "ThiefCharacter.generated.h"
@@ -99,6 +101,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* DeathAnimation;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
+	TMap<TEnumAsByte<EPhysicalSurface>, TObjectPtr<USoundBase>> FootstepSounds;
+	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
+	TObjectPtr<USoundBase> DefaultFootstepSound;
+	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
+	float RunNoiseLoudness = 1.5f;
+	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
+	float RunNoiseRange = 1800.f;
+	
 public:
 	virtual void DoMove(float Right, float Forward) override;
 	virtual void Landed(const FHitResult& Hit) override;
@@ -116,8 +127,12 @@ public:
 	void Multicast_Kick();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_RemoveOnGroundItem(AInteractableActor* InteractableActor);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_GotExecuted();
 	
 	void DropItem(const int32 Index);
 	void GotExecuted(AWeretigerCharacter* Weretiger);
 	bool IsDead();
+	UFUNCTION(BlueprintCallable, Category = "Footstep")
+	void PlayFootstep();
 };

@@ -9,6 +9,8 @@
 #include "ThiefPlayerState.h"
 #include "Components/VerticalBox.h"
 #include "TimerManager.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/VerticalBox.h"
 
 FTimerHandle RefreshLeaderboardTimer;
 
@@ -32,10 +34,15 @@ void UMainUI::NativeConstruct()
 		&UMainUI::BindSinglePlayerState
 	);
 
+	if (FullBlackScreenFadable)
+	{
+		FullBlackScreenFadable->FadeToNormalScreen();
+	}
+	
 	RefreshLeaderboard();
 }
 
-void UMainUI::HandleMoneyChanged()
+void UMainUI::HandleDataChanged()
 {
 	RefreshLeaderboard();
 }
@@ -44,9 +51,9 @@ void UMainUI::BindSinglePlayerState(AThiefPlayerState* ThiefPS)
 {
 	if (!IsValid(ThiefPS)) return;
 
-	ThiefPS->OnMoneyChanged.AddUniqueDynamic(
+	ThiefPS->OnDataChanged.AddUniqueDynamic(
 		this,
-		&UMainUI::HandleMoneyChanged
+		&UMainUI::HandleDataChanged
 	);
 
 	RefreshLeaderboard();
@@ -71,10 +78,7 @@ void UMainUI::RefreshLeaderboard()
 
 	for (AThiefPlayerState* PS : Players)
 	{
-		if (!IsValid(PS))
-		{
-			continue;
-		}
+		if (!IsValid(PS)) continue;
 
 		UThiefLeaderboardBar* ThiefPlayerBar =
 			CreateWidget<UThiefLeaderboardBar>(
@@ -82,13 +86,11 @@ void UMainUI::RefreshLeaderboard()
 				ThiefLeaderboardBarClass
 			);
 
-		if (!IsValid(ThiefPlayerBar))
-		{
-			continue;
-		}
+		if (!IsValid(ThiefPlayerBar)) continue;
 
 		ThiefPlayerBar->Setup(PS);
 		ThiefPlayerBar->SetPlayerName(PS->GetDisplayName());
+		ThiefPlayerBar->SetShowDeathIcon(!PS->GetIsAlive());
 
 		LeaderboardList->AddChild(ThiefPlayerBar);
 	}
@@ -160,4 +162,15 @@ void UMainUI::SetTimeLeft(const float RemainingTime)
 	}
 	
 	LastTimeLeftSecond = TotalSeconds;
+}
+
+void UMainUI::SwitchToFullLeaderboard()
+{
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(LeaderboardList->Slot))
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+		CanvasSlot->SetPosition(FVector2D::ZeroVector);
+		CanvasSlot->SetSize(FVector2D(1000.0f, 900.0f));
+	}
 }

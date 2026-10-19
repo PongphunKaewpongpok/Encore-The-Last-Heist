@@ -15,8 +15,10 @@ class ENCORE_THELASTHEIST1_API AWeretigerAIController : public ABaseAIController
 	GENERATED_BODY()
 	
 	FTimerHandle FormChangedTimerHandle;
-	void FormChangedEvent(); 
 	
 protected:
-	void OnTargetSensed(AActor* Actor, FAIStimulus Stimulus);
+	virtual void OnTargetSensed(AActor* Actor, FAIStimulus Stimulus) override;
+	
+public:
+	void FormChangedEvent(); 
 };

@@ -85,13 +85,7 @@ void ABaseAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 	UBlackboardComponent* BB = GetBlackboardComponent();
 	if (BB == nullptr || Actor == nullptr) return;
 	
-	AThiefCharacter* ThiefActor = Cast<AThiefCharacter>(Actor);
-	if (ThiefActor->IsDead()) return;
-	
 	const TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus);
-	
-	
-	
 	
 	if (Sense == UAISense_Sight::StaticClass())
 	{

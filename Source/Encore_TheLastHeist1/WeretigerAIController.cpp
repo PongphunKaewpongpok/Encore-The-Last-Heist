@@ -12,11 +12,14 @@
 void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 {
 	UBlackboardComponent* BB = GetBlackboardComponent();
-	if (BB == nullptr || Actor == nullptr) { return; }
+	if (BB == nullptr || Actor == nullptr) return;
 	
 	AWeretigerCharacter* Me = Cast<AWeretigerCharacter>(GetCharacter());
-	if (Me == nullptr) { return; }
+	if (Me == nullptr) return;
 	
+	AThiefCharacter* ThiefActor = Cast<AThiefCharacter>(Actor);
+	if (!IsValid(ThiefActor)) return;
+	if (ThiefActor->IsDead()) return;
 	
 	const TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus);
 	
@@ -29,17 +32,16 @@ void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 		else
 		{
 			const AActor* LastTargetActor = Cast<AActor>(BB->GetValueAsObject(TargetActorKey));
-			BB->SetValueAsVector(InvestigateLocationKey, LastTargetActor->GetActorLocation());
 			
-			BB->ClearValue(TargetActorKey);
+			if (IsValid(LastTargetActor))
+			{
+				BB->SetValueAsVector(
+					InvestigateLocationKey,
+					LastTargetActor->GetActorLocation()
+				);
+			}
 			
-			GetWorldTimerManager().SetTimer(
-				FormChangedTimerHandle,
-				this,
-				&AWeretigerAIController::FormChangedEvent,
-				1.5f,
-				false
-			);
+			FormChangedEvent();
 		}
 			
 		return;
@@ -53,8 +55,13 @@ void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 
 void AWeretigerAIController::FormChangedEvent()
 {
+	if (!HasAuthority()) return;
+	
 	AWeretigerCharacter* Me = Cast<AWeretigerCharacter>(GetCharacter());
-	if (Me == nullptr) { return; }
+	if (Me == nullptr) return;
+	
+	UCharacterMovementComponent* Movement = Me->GetCharacterMovement();
+	if (!IsValid(Movement)) return;
 	
 	if (Me->GetForm().Equals("Human"))
 	{

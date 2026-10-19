@@ -5,9 +5,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/VerticalBox.h"
 #include "Widgets/ThiefLeaderboardBar.h"
+#include "Widgets/FullBlackScreenFadable.h"
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
 #include "MainUI.generated.h"
 
 class UTextBlock;
@@ -26,10 +26,12 @@ protected:
 	
 public:
 	UFUNCTION()
-	void HandleMoneyChanged();
+	void HandleDataChanged();
 
 	void BindSinglePlayerState(AThiefPlayerState* ThiefPS);
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UFullBlackScreenFadable> FullBlackScreenFadable;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UVerticalBox> LeaderboardList;
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -58,6 +60,7 @@ public:
 	void SetStorageMoney(const int32 BankMoney) const;
 	
 	void SetTimeLeft(const float RemainingTime);
+	void SwitchToFullLeaderboard();
 	
 	
 };

@@ -30,7 +30,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	UFUNCTION()
-	void OnTargetSensed(AActor* Actor, FAIStimulus Stimulus);
+	virtual void OnTargetSensed(AActor* Actor, FAIStimulus Stimulus);
 	
 	UPROPERTY(EditAnywhere, Category="AI")
 	UBehaviorTree* BehaviorTreeAsset;

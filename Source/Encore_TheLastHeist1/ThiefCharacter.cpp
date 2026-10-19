@@ -18,9 +18,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Widgets/PlayerHeadNametag.h"
 #include "WeretigerCharacter.h"
-
-
-
+#include "Components/CapsuleComponent.h"
 
 
 AThiefCharacter::AThiefCharacter()
@@ -36,6 +34,9 @@ AThiefCharacter::AThiefCharacter()
 	KickReach->SetCollisionResponseToAllChannels(ECR_Ignore);
 	KickReach->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	KickReach->SetGenerateOverlapEvents(true);
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	
 	NameWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("NametagWidgetComponent"));
 	NameWidgetComponent->SetupAttachment(GetMesh(), TEXT("Head"));
@@ -118,6 +119,7 @@ void AThiefCharacter::PossessedBy(AController* NewController)
 
 void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	const bool bSprint = Value.Get<bool>();
@@ -129,6 +131,7 @@ void AThiefCharacter::ToggleSprint(const FInputActionValue& Value)
 
 void AThiefCharacter::DoKick(const FInputActionValue& Value)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	ServerKick();
@@ -137,6 +140,7 @@ void AThiefCharacter::DoKick(const FInputActionValue& Value)
 void AThiefCharacter::OnMouseWheel(const FInputActionValue& Value)
 {
 	if (!IsLocallyControlled()) return;
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	const float WheelValue = Value.Get<float>();
@@ -156,10 +160,14 @@ void AThiefCharacter::OnMouseWheel(const FInputActionValue& Value)
 
 void AThiefCharacter::DoInteract(const FInputActionValue& Value)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	AThiefPlayerController* TargetPC = Cast<AThiefPlayerController>(GetController());
+	if (!IsValid(TargetPC)) return;
+	
 	AInteractableActor* TargetItem = TargetPC->ItemOnGroundTabWidget->GetSelectedInteractableActor();
+	if (!IsValid(TargetItem)) return;
 	
 	TargetPC->ItemOnGroundTabWidget->CollectItem();
 	ServerInteract(TargetItem);
@@ -171,6 +179,7 @@ void AThiefCharacter::DoInteract(const FInputActionValue& Value)
 void AThiefCharacter::UpdateSprint()
 {
 	if (!bDoAnimationDone) return;
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	if (ThiefComponent->bIsSprint)
@@ -187,6 +196,7 @@ void AThiefCharacter::UpdateSprint()
 void AThiefCharacter::StartRolling()
 {
 	if (!bDoAnimationDone) return;
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 
 	FVector Direction = GetVelocity().GetSafeNormal2D();
@@ -284,6 +294,7 @@ void AThiefCharacter::Knockdown(const FVector& Direction, const float Strength)
 
 void AThiefCharacter::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	bDoAnimationDone = true;
@@ -302,6 +313,7 @@ void AThiefCharacter::ServerInteract_Implementation(AInteractableActor* TargetIt
 {
 	if (!TargetItem) return;
 	if (!TargetItem->IsCanCollect(this)) return;
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	ThiefComponent->AddInventory(TargetItem->ItemData);
@@ -324,8 +336,17 @@ void AThiefCharacter::Multicast_RemoveOnGroundItem_Implementation(AInteractableA
 	);
 }
 
+void AThiefCharacter::Multicast_GotExecuted_Implementation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance || !DeathAnimation) return;
+
+	AnimInstance->Montage_Play(DeathAnimation);
+}
+
 void AThiefCharacter::DropItem(const int32 Index)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	ThiefComponent->RemoveInventoryAt(Index);
@@ -333,14 +354,28 @@ void AThiefCharacter::DropItem(const int32 Index)
 
 void AThiefCharacter::GotExecuted(AWeretigerCharacter* Weretiger)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
+	if (!Weretiger) return;
 	
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	Multicast_GotExecuted();
 	
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!IsValid(PC)) return;
+	
+	AThiefPlayerState* PS = GetPlayerState<AThiefPlayerState>();
+	if (!IsValid(PS)) return;
+	
+	PS->SetIsAlive(false);
 	ThiefComponent->bIsAlive = false;
+	
+	
 	GetCharacterMovement()->StopMovementImmediately();
 	SetCanJump(false);
 	PC->SetIgnoreMoveInput(true);
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->GravityScale = 0.0f;
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	
 	
@@ -370,31 +405,71 @@ void AThiefCharacter::GotExecuted(AWeretigerCharacter* Weretiger)
 
 bool AThiefCharacter::IsDead()
 {
+	if (!IsValid(ThiefComponent)) return false;
+	
 	return !ThiefComponent->bIsAlive;
+}
+
+void AThiefCharacter::PlayFootstep()
+{
+	if (!GetWorld()) return;
+
+	const FVector Start = GetActorLocation();
+	const FVector End = Start - FVector(0.f, 0.f, 150.f);
+
+	FHitResult Hit;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.bReturnPhysicalMaterial = true;
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	if (!bHit) return;
+
+	const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+
+	TObjectPtr<USoundBase>* FoundSound = FootstepSounds.Find(SurfaceType);
+	USoundBase* Sound = FoundSound ? *FoundSound : DefaultFootstepSound;
+
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			Sound,
+			Hit.ImpactPoint
+		);
+	}
+
+	UAISense_Hearing::ReportNoiseEvent(
+		GetWorld(),
+		Hit.ImpactPoint,
+		RunNoiseLoudness,
+		this,
+		RunNoiseLoudness,
+		TEXT("Footstep")
+	);
 }
 
 void AThiefCharacter::DoMove(float Right, float Forward)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	Super::DoMove(Right, Forward);
-	
-	// SHOULD Binding Notify in future
-	if (ThiefComponent->bIsSprint)
-	{
-		UAISense_Hearing::ReportNoiseEvent( GetWorld(),
-											GetActorLocation(), 
-											10.0f, 
-											this, 
-											SprintNoiseRange,
-											TEXT("Footsteps"));
-	}
 }
 
 void AThiefCharacter::ServerKick_Implementation()
 {
 	if (!bDoAnimationDone) return;
 	if (GetCharacterMovement()->IsFalling()) return;
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	const float Now = GetWorld()->GetTimeSeconds();
@@ -440,6 +515,7 @@ bool AThiefCharacter::ServerKick_Validate()
 
 void AThiefCharacter::ServerSprint_Implementation(bool bIsSprint)
 {
+	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
 	
 	ThiefComponent->bIsSprint = bIsSprint;

@@ -7,6 +7,7 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
+#include "Camera/CameraActor.h"
 
 void AThiefPlayerController::BeginPlay()
 {
@@ -84,6 +85,8 @@ void AThiefPlayerController::BeginPlay()
 	}
 }
 
+
+
 void AThiefPlayerController::SetChaseMusic(bool bStatus)
 {
 	if (!IsLocalController()) return;
@@ -112,6 +115,52 @@ void AThiefPlayerController::SetChaseMusic(bool bStatus)
 		}
 	}
 }
+
+
+
+void AThiefPlayerController::OnGameEnd()
+{
+	if (!IsLocalController()) return;
+	if (bGameEnd) return;
+	
+	bGameEnd = true;
+	if (!IsValid(MainUIWidget) || !IsValid(MainUIWidget->FullBlackScreenFadable)) return;
+
+	MainUIWidget->FullBlackScreenFadable->OnFadeFinished.AddUniqueDynamic(
+		this,
+		&AThiefPlayerController::OnBlackScreenFadeFinished
+	);
+	
+	
+	
+	MainUIWidget->FullBlackScreenFadable->FadeToBlackScreen();
+}
+
+void AThiefPlayerController::OnBlackScreenFadeFinished()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Complete BC..."))
+	MainUIWidget->SwitchToFullLeaderboard();
+	
+	
+	TArray<AActor*> Cameras;
+	UGameplayStatics::GetAllActorsWithTag(
+		GetWorld(),
+		FName("EndGameCamera"),
+		Cameras
+	);
+	if (!IsValid(Cameras[0])) return;
+	
+	ACameraActor* TargetCamera = Cast<ACameraActor>(Cameras[0]);
+	if (!IsValid(TargetCamera)) return;
+	
+	SetViewTargetWithBlend(TargetCamera, 0.0f);
+	
+	
+	MainUIWidget->FullBlackScreenFadable->FadeToNormalScreen();
+}
+
+
+
 
 void AThiefPlayerController::Client_SetChaseMusic_Implementation(bool bStatus)
 {

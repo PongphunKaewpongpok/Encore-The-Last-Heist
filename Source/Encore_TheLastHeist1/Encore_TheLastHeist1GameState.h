@@ -13,7 +13,9 @@ UCLASS()
 class ENCORE_THELASTHEIST1_API AEncore_TheLastHeist1GameState : public AGameStateBase
 {
 	GENERATED_BODY()
-
+	
+	UPROPERTY()
+	bool bReturnCountdownStarted = false;
 public:
 	AEncore_TheLastHeist1GameState();
 	
@@ -32,7 +34,7 @@ public:
 	
 	
 	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly)
-	float RemainingTime = 35.0f;
+	float RemainingTime = 5.0f;
 	UFUNCTION()
 	void OnRep_RemainingTime();
 	

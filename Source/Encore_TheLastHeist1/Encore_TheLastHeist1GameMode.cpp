@@ -7,9 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "InteractableActor.h"
 #include "Components/StaticMeshComponent.h"
-#include "ProfilingDebugging/CookStats.h"
 #include "TimerManager.h"
-#include "Encore_TheLastHeist1GameState.h"
 
 void AEncore_TheLastHeist1GameMode::BeginPlay()
 {
@@ -29,6 +27,20 @@ void AEncore_TheLastHeist1GameMode::BeginPlay()
 AEncore_TheLastHeist1GameMode::AEncore_TheLastHeist1GameMode()
 {
 	// stub
+}
+
+void AEncore_TheLastHeist1GameMode::StartCountdownReturnToLobby(const float Duration)
+{
+    if (!HasAuthority()) return;
+
+    GetWorldTimerManager().ClearTimer(ReturnToLobbyTimerHandle);
+    GetWorldTimerManager().SetTimer(
+        ReturnToLobbyTimerHandle,
+        this,
+        &AEncore_TheLastHeist1GameMode::TravelToLobby,
+        Duration,
+        false
+    );
 }
 
 void AEncore_TheLastHeist1GameMode::SpawnRandomItems(const int SpawnCount)
@@ -93,4 +105,9 @@ void AEncore_TheLastHeist1GameMode::SpawnItem(const FVector& Location, UItemData
         SpawnedActor->ItemData = Item;
         SpawnedActor->SetItemMesh(Item->Mesh, Item->Scale);
     }
+}
+
+void AEncore_TheLastHeist1GameMode::TravelToLobby()
+{
+    GetWorld()->ServerTravel(TEXT("/Game/Levels/L_Lobby?listen"));
 }
