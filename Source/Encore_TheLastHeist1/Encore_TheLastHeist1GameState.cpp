@@ -8,7 +8,6 @@
 #include "ThiefPlayerState.h"
 #include "Encore_TheLastHeist1GameMode.h"
 #include "Components/AudioComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 AEncore_TheLastHeist1GameState::AEncore_TheLastHeist1GameState()
 {

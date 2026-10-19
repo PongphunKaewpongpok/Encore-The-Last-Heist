@@ -3,7 +3,6 @@
 
 #include "AnimNotify_PlaySound3D.h"
 
-#include "ThiefCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 

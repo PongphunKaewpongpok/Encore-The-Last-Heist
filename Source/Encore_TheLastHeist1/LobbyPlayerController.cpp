@@ -93,10 +93,9 @@ void ALobbyPlayerController::BeginPlay()
 	
 	ALobbyThiefDummy* FoundDummy = nullptr;
 
-	for (TActorIterator<ALobbyThiefDummy> It(GetWorld()); It; ++It)
+	if (TActorIterator<ALobbyThiefDummy> It(GetWorld()); It)
 	{
 		FoundDummy = *It;
-		break;
 	}
 
 	if (IsValid(FoundDummy))

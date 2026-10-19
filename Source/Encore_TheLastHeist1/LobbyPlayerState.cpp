@@ -5,8 +5,6 @@
 
 #include "ThiefPlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "LobbyThiefDummy.h"
-#include "EngineUtils.h"
 #include "LobbyPlayerController.h"
 #include "Widgets/LobbyDisplayName.h"
 

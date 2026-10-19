@@ -8,7 +8,6 @@
 #include "WeretigerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "ThiefPlayerController.h"
 
 UBTTask_Weretiger_HumanChase::UBTTask_Weretiger_HumanChase()
 {

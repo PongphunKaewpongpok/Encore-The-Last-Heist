@@ -6,7 +6,6 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "WeretigerAIController.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"

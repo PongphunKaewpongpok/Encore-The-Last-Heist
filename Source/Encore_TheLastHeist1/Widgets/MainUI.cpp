@@ -10,7 +10,6 @@
 #include "Components/VerticalBox.h"
 #include "TimerManager.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Components/VerticalBox.h"
 
 FTimerHandle RefreshLeaderboardTimer;
 

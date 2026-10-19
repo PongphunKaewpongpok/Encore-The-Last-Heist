@@ -3,8 +3,6 @@
 
 #include "LobbyGameMode.h"
 
-#include "Kismet/GameplayStatics.h"
-#include "Camera/CameraActor.h"
 
 void ALobbyGameMode::BeginPlay()
 {
