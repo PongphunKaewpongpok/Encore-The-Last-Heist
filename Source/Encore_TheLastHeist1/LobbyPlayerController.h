@@ -5,11 +5,13 @@
 #include "Components/SpotLightComponent.h"
 #include "Widgets/LobbyMainUI.h"
 
+
 #include "CoreMinimal.h"
 #include "Encore_TheLastHeist1PlayerController.h"
 #include "LobbyPlayerController.generated.h"
 
 class UInputAction;
+class ULobbyDisplayName;
 /**
  * 
  */
@@ -37,6 +39,9 @@ class ENCORE_THELASTHEIST1_API ALobbyPlayerController : public AEncore_TheLastHe
 	float CurrentYaw = 0.0f;
 	float CurrentPitch = 0.0f;
 	
+	
+	bool bIsTraveling = false;
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -49,6 +54,11 @@ public:
 	TObjectPtr<ULobbyMainUI> LobbyMainUIWidget;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<ULobbyMainUI> LobbyMainUIWidgetClass;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	TObjectPtr<ULobbyDisplayName> LobbyDisplayNameWidget;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<ULobbyDisplayName> LobbyDisplayNameWidgetClass;
 	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")

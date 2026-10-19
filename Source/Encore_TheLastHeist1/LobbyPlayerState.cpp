@@ -7,6 +7,8 @@
 #include "Net/UnrealNetwork.h"
 #include "LobbyThiefDummy.h"
 #include "EngineUtils.h"
+#include "LobbyPlayerController.h"
+#include "Widgets/LobbyDisplayName.h"
 
 void ALobbyPlayerState::CopyProperties(APlayerState* PlayerState)
 {
@@ -30,16 +32,9 @@ void ALobbyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 void ALobbyPlayerState::OnRep_DisplayName()
 {
-	ALobbyThiefDummy* FoundDummy = nullptr;
-
-	for (TActorIterator<ALobbyThiefDummy> It(GetWorld()); It; ++It)
-	{
-		FoundDummy = *It;
-		break;
-	}
-
-	if (IsValid(FoundDummy))
-	{
-		FoundDummy->SetDisplayName(DisplayName);
-	}
+	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(GetPlayerController());
+	if (!PC) return;
+	if (!PC->IsLocalController()) return;
+	
+	PC->LobbyDisplayNameWidget->SetDisplayName(DisplayName);
 }

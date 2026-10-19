@@ -3,14 +3,26 @@
 
 #include "LobbyThiefDummy.h"
 
-#include "LobbyPlayerState.h"
+#include "SkeletonTreeBuilder.h"
+#include "Widgets/LobbyDisplayName.h"
+#include "Components/WidgetComponent.h"
+#include "Rendering/RenderCommandPipes.h"
 
 // Sets default values
 ALobbyThiefDummy::ALobbyThiefDummy()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetSkeletalMesh(ThiefSkeletalMesh);
+	
+	FloatingWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FloatingWidget"));
+	FloatingWidget->SetupAttachment(SkeletalMesh, TEXT("Head"));
+	FloatingWidget->SetRelativeLocation(FVector(0.0f, -30.0f, 0.0f));
+	FloatingWidget->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	FloatingWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	FloatingWidget->SetWidgetClass(LobbyDisplayNameWidgetClass);
 }
 
 // Called when the game starts or when spawned
@@ -34,7 +46,7 @@ void ALobbyThiefDummy::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-void ALobbyThiefDummy::SetDisplayName_Implementation(const FText& DisplayName)
+void ALobbyThiefDummy::AddWidget(ULobbyDisplayName* TargetWidget)
 {
+	FloatingWidget->SetWidget(TargetWidget);
 }
-

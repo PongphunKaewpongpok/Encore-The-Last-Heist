@@ -5,10 +5,25 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "LobbyPlayerState.h"
 
 AThiefPlayerState::AThiefPlayerState()
 {
 	bReplicates = true;
+}
+
+void AThiefPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+	
+	ALobbyPlayerState* NewPlayerState = Cast<ALobbyPlayerState>(PlayerState);
+
+	if (IsValid(NewPlayerState))
+	{
+		NewPlayerState->DisplayName = DisplayName.ToString().Equals(TEXT("Anonymous"))
+										? FText::GetEmpty()
+										: DisplayName;
+	}
 }
 
 void AThiefPlayerState::SetMoney(int32 NewMoney)
@@ -72,6 +87,11 @@ void AThiefPlayerState::OnRep_IsAlive()
 		PlaySomeoneDeathSound();
 	}
 	
+	OnDataChanged.Broadcast();
+}
+
+void AThiefPlayerState::OnRep_DisplayName()
+{
 	OnDataChanged.Broadcast();
 }
 

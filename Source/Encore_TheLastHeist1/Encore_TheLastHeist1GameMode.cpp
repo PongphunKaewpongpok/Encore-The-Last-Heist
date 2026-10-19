@@ -2,6 +2,7 @@
 
 #include "Encore_TheLastHeist1GameMode.h"
 
+#include "Encore_TheLastHeist1GameState.h"
 #include "EngineUtils.h"
 #include "Engine/TriggerBox.h"
 #include "Components/BoxComponent.h"
@@ -26,7 +27,7 @@ void AEncore_TheLastHeist1GameMode::BeginPlay()
 
 AEncore_TheLastHeist1GameMode::AEncore_TheLastHeist1GameMode()
 {
-	// stub
+    bUseSeamlessTravel = true;
 }
 
 void AEncore_TheLastHeist1GameMode::StartCountdownReturnToLobby(const float Duration)
@@ -109,5 +110,9 @@ void AEncore_TheLastHeist1GameMode::SpawnItem(const FVector& Location, UItemData
 
 void AEncore_TheLastHeist1GameMode::TravelToLobby()
 {
+    AEncore_TheLastHeist1GameState* GS = GetGameState<AEncore_TheLastHeist1GameState>();
+    if (!GS) return;
+    
+    GS->Multicast_ReadyForTravelToLobby();
     GetWorld()->ServerTravel(TEXT("/Game/Levels/L_Lobby?listen"));
 }

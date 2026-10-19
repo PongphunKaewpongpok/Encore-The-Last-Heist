@@ -42,11 +42,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	TObjectPtr<USoundBase> Sound_AmbienceBackground;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	TObjectPtr<USoundBase> Sound_MusicEndGame;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	TObjectPtr<USoundBase> Sound_Chase;
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> MusicBackgroundAudioComponent;
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> AmbienceBackgroundAudioComponent;
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> MusicEndGameAudioComponent;
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> ChaseAudioComponent;
 

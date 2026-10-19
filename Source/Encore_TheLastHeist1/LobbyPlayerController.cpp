@@ -3,6 +3,7 @@
 
 #include "LobbyPlayerController.h"
 
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 #include "Camera/CameraActor.h"
@@ -10,6 +11,8 @@
 #include "LobbyGameMode.h"
 #include "LobbyTextRenderActor.h"
 #include "LobbyGameState.h"
+#include "Widgets/LobbyDisplayName.h"
+#include "LobbyThiefDummy.h"
 
 
 FTimerHandle DummyTimerHandle;
@@ -77,6 +80,30 @@ void ALobbyPlayerController::BeginPlay()
 		if (LobbyMainUIWidget)
 		{
 			LobbyMainUIWidget->AddToViewport();
+		}
+	}
+	
+	if (LobbyDisplayNameWidgetClass)
+	{
+		LobbyDisplayNameWidget = CreateWidget<ULobbyDisplayName>(
+			this,
+			LobbyDisplayNameWidgetClass
+		);
+	}
+	
+	ALobbyThiefDummy* FoundDummy = nullptr;
+
+	for (TActorIterator<ALobbyThiefDummy> It(GetWorld()); It; ++It)
+	{
+		FoundDummy = *It;
+		break;
+	}
+
+	if (IsValid(FoundDummy))
+	{
+		if (LobbyDisplayNameWidget)
+		{
+			FoundDummy->AddWidget(LobbyDisplayNameWidget);
 		}
 	}
 	
@@ -177,6 +204,7 @@ void ALobbyPlayerController::Tick(float DeltaTime)
 
 void ALobbyPlayerController::SwitchLight()
 {
+	if (bIsTraveling) return;
 	if (DummysArray.IsEmpty()) return;
 	
 	RedSpotlight->SetVisibility(!RedSpotlight->IsVisible());
@@ -197,7 +225,10 @@ void ALobbyPlayerController::SwitchLight()
 void ALobbyPlayerController::GameStarting()
 {
 	if (!IsLocalController()) return;
-
+	
+	GetWorldTimerManager().ClearTimer(DummyTimerHandle);
+	bIsTraveling = true;
+	
 	LobbyMusicAudioComponent->Stop();
 	
 	bShowMouseCursor = false;
@@ -244,6 +275,7 @@ bool ALobbyPlayerController::ServerReady_Validate()
 void ALobbyPlayerController::ServerSetDisplayName_Implementation(const FText& DisplayName)
 {
 	ALobbyPlayerState* PS = GetPlayerState<ALobbyPlayerState>();
+	if (!IsValid(PS)) return;
 	
 	FText TrimmedText = FText::TrimPrecedingAndTrailing(DisplayName);
 	FString InputString = TrimmedText.ToString();
@@ -251,4 +283,5 @@ void ALobbyPlayerController::ServerSetDisplayName_Implementation(const FText& Di
 	FText ResultText = FText::FromString(LeftString);
 	
 	PS->DisplayName = (ResultText.EqualTo(FText::FromString("")) ? FText::FromString("Anonymous") : ResultText);
+	PS->OnRep_DisplayName();
 }

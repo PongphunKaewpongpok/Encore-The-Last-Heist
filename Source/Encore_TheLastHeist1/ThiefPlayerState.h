@@ -18,6 +18,8 @@ public:
 	AThiefPlayerState();
 
 protected:
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_Money, BlueprintReadOnly, Category = "Player Data")
 	int32 Money = 0;
 	UFUNCTION()
@@ -28,8 +30,10 @@ protected:
 	UFUNCTION()
 	void OnRep_IsAlive();
 	
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player Data")
+	UPROPERTY(ReplicatedUsing = OnRep_DisplayName, BlueprintReadOnly, Category = "Player Data")
 	FText DisplayName = FText::FromString("Anonymous");
+	UFUNCTION()
+	void OnRep_DisplayName();
 	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")

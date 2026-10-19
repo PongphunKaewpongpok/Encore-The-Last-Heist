@@ -6,6 +6,9 @@
 #include "GameFramework/Pawn.h"
 #include "LobbyThiefDummy.generated.h"
 
+class ULobbyDisplayName;
+class UWidgetComponent;
+
 UCLASS()
 class ENCORE_THELASTHEIST1_API ALobbyThiefDummy : public APawn
 {
@@ -16,16 +19,24 @@ public:
 	ALobbyThiefDummy();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+    TObjectPtr<UWidgetComponent> FloatingWidget;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<ULobbyDisplayName> LobbyDisplayNameWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
+	TObjectPtr<USkeletalMesh> ThiefSkeletalMesh;
+	
 public:	
 	// Called every frame
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetDisplayName(const FText& DisplayName);
+	void AddWidget(ULobbyDisplayName* TargetWidget);
 };

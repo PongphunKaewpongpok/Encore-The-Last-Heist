@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ThiefPlayerState.h"
 #include "Encore_TheLastHeist1GameMode.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AEncore_TheLastHeist1GameState::AEncore_TheLastHeist1GameState()
@@ -36,6 +37,17 @@ void AEncore_TheLastHeist1GameState::RemovePlayerState(
 void AEncore_TheLastHeist1GameState::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AEncore_TheLastHeist1GameState::Multicast_ReadyForTravelToLobby_Implementation()
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!IsValid(PC)) return;
+
+	AThiefPlayerController* ThiefPC = Cast<AThiefPlayerController>(PC);
+	if (!IsValid(ThiefPC)) return;
+	
+	ThiefPC->MusicEndGameAudioComponent->Stop();
 }
 
 void AEncore_TheLastHeist1GameState::Tick(float DeltaSeconds)

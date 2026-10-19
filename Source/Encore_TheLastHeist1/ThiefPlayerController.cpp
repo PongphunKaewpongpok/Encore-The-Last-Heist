@@ -131,7 +131,31 @@ void AThiefPlayerController::OnGameEnd()
 		&AThiefPlayerController::OnBlackScreenFadeFinished
 	);
 	
+	MusicBackgroundAudioComponent->Stop();
+	AmbienceBackgroundAudioComponent->Stop();
+	/*ChaseAudioComponent->Stop();*/
 	
+	if (Sound_MusicEndGame)
+	{
+		MusicEndGameAudioComponent =
+			UGameplayStatics::SpawnSound2D(
+				this,
+				Sound_MusicEndGame,
+				0.0f,
+				1.0f,
+				0.0f,
+				nullptr,
+				true,
+				false
+			);
+
+		if (MusicEndGameAudioComponent)
+		{
+			MusicEndGameAudioComponent->SetVolumeMultiplier(0.15f);
+		}
+	}
+	
+	MusicBackgroundAudioComponent->Stop();
 	
 	MainUIWidget->FullBlackScreenFadable->FadeToBlackScreen();
 }
@@ -148,7 +172,7 @@ void AThiefPlayerController::OnBlackScreenFadeFinished()
 		FName("EndGameCamera"),
 		Cameras
 	);
-	if (!IsValid(Cameras[0])) return;
+	if (Cameras.IsEmpty()) return;
 	
 	ACameraActor* TargetCamera = Cast<ACameraActor>(Cameras[0]);
 	if (!IsValid(TargetCamera)) return;

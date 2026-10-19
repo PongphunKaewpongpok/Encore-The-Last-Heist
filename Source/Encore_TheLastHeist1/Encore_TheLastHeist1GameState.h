@@ -43,4 +43,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ReadyForTravelToLobby();
 };
