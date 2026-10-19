@@ -76,6 +76,13 @@ void UMainUI::RefreshLeaderboard()
 		return A.GetMoney() > B.GetMoney();
 	});
 
+	int32 MostMoney = 0;
+	if (!Players.IsEmpty())
+	{
+		MostMoney = Players[0]->GetMoney();
+	}
+	
+	
 	for (AThiefPlayerState* PS : Players)
 	{
 		if (!IsValid(PS)) continue;
@@ -91,7 +98,11 @@ void UMainUI::RefreshLeaderboard()
 		ThiefPlayerBar->Setup(PS);
 		ThiefPlayerBar->SetPlayerName(PS->GetDisplayName());
 		ThiefPlayerBar->SetShowDeathIcon(!PS->GetIsAlive());
-
+		if (MostMoney == PS->GetMoney())
+		{
+			ThiefPlayerBar->SetShowRankIcon(true);
+		}
+		
 		LeaderboardList->AddChild(ThiefPlayerBar);
 	}
 }

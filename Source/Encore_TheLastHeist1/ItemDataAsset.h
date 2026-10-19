@@ -19,6 +19,9 @@ public:
 	FText ItemName;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UTexture2D> Image = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FText Rarity;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

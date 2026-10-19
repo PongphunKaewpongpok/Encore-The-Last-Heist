@@ -32,6 +32,10 @@ public:
 	TObjectPtr<UTextBlock> PriceValueText;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UTextBlock> ItemNameText;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UBorder> RarityColorBorder;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UImage> ItemImage;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UImage> InteractIcon;

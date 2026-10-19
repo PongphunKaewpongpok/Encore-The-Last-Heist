@@ -74,3 +74,10 @@ void UThiefLeaderboardBar::SetShowDeathIcon(const bool bIsShow) const
 	
 	DeathIcon->SetVisibility(bIsShow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
+
+void UThiefLeaderboardBar::SetShowRankIcon(const bool bIsShow) const
+{
+	if (!RankingIcon) return;
+	
+	RankingIcon->SetVisibility(bIsShow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+}

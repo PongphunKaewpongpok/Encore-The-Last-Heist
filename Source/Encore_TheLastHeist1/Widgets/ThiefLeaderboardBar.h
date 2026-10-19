@@ -41,4 +41,5 @@ public:
 	void SetMoney(const int32 Money) const;
 	void SetBarColor(const FLinearColor Color) const;
 	void SetShowDeathIcon(const bool bIsShow) const;
+	void SetShowRankIcon(const bool bIsShow) const;
 };

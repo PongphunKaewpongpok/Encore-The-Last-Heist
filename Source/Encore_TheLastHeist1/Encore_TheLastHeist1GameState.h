@@ -34,7 +34,7 @@ public:
 	
 	
 	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly)
-	float RemainingTime = 5.0f;
+	float RemainingTime = 180.0f;
 	UFUNCTION()
 	void OnRep_RemainingTime();
 	
