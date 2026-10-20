@@ -13,6 +13,7 @@
 #include "LobbyGameState.h"
 #include "Widgets/LobbyDisplayName.h"
 #include "LobbyThiefDummy.h"
+#include "GameFramework/GameUserSettings.h"
 
 
 FTimerHandle DummyTimerHandle;
@@ -21,6 +22,13 @@ FTimerHandle DummyTimerHandle;
 void ALobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// Graphic Settings
+	if (UGameUserSettings* Settings = UGameUserSettings::GetGameUserSettings())
+	{
+		Settings->SetOverallScalabilityLevel(0);
+		Settings->ApplySettings(false);
+	}
 
 	if (!IsLocalController()) return;
 	

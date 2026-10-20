@@ -5,6 +5,12 @@ Intermediate/
 Saved/
 .vs/
 
+# Packaged builds
+Windows/
+
+# Debug symbols
+*.pdb
+
 # Visual Studio
 .vscode/
 *.VC.db
