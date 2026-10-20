@@ -22,7 +22,7 @@ void AEncore_TheLastHeist1GameMode::BeginPlay()
         }
     }
     
-    SpawnRandomItems(30);
+    SpawnRandomItems(70);
 }
 
 AEncore_TheLastHeist1GameMode::AEncore_TheLastHeist1GameMode()

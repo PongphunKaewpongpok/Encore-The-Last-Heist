@@ -36,3 +36,11 @@ void ALobbyPlayerState::OnRep_DisplayName()
 	
 	PC->LobbyDisplayNameWidget->SetDisplayName(DisplayName);
 }
+
+void ALobbyPlayerState::SetDisplayName(const FText& NewDisplayName)
+{
+	if (!HasAuthority()) return;
+	if (DisplayName.EqualTo(NewDisplayName)) return;
+
+	DisplayName = NewDisplayName;
+}

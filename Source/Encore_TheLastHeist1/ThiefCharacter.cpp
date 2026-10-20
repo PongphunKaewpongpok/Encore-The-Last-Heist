@@ -8,7 +8,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Encore_TheLastHeist1.h"
-#include "Encore_TheLastHeist1GameState.h"
 #include "Perception/AISense_Hearing.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -297,6 +296,7 @@ void AThiefCharacter::OnMontageFinished(UAnimMontage* Montage, bool bInterrupted
 {
 	if (!IsValid(ThiefComponent)) return;
 	if (!ThiefComponent->bIsAlive) return;
+	if (bInterrupted) return;
 	
 	bDoAnimationDone = true;
 	SetCanJump(true);
@@ -451,7 +451,12 @@ void AThiefCharacter::PlayFootstep()
 		UGameplayStatics::PlaySoundAtLocation(
 			this,
 			Sound,
-			Hit.ImpactPoint
+			Hit.ImpactPoint,
+			FRotator::ZeroRotator,
+			1.0f,
+			1.0f,
+			0.0f,
+			FootstepSoundAttenuation
 		);
 	}
 
@@ -460,7 +465,7 @@ void AThiefCharacter::PlayFootstep()
 		Hit.ImpactPoint,
 		RunNoiseLoudness,
 		this,
-		RunNoiseLoudness,
+		RunNoiseRange,
 		TEXT("Footstep")
 	);
 }

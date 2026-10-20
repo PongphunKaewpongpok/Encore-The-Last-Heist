@@ -20,10 +20,17 @@ protected:
 public:
 	virtual auto GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const -> void override;
 	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDataChanged);
+	UPROPERTY(BlueprintAssignable, Category = "Player Data")
+	FOnDataChanged OnDataChanged;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_DisplayName, BlueprintReadWrite, Category = "Player Data")
-	FText DisplayName = FText::FromString("Anonymous");;
+	FText DisplayName = FText::FromString("Anonymous");
 	UFUNCTION(BlueprintCallable, Category = "Player Data")
 	void OnRep_DisplayName();
+	UFUNCTION(BlueprintCallable, Category = "Player Data")
+	void SetDisplayName(const FText& NewDisplayName);
+	
 	
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Player Data")
 	bool IsReady = false;

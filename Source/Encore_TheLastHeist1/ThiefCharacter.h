@@ -105,6 +105,8 @@ protected:
 	TMap<TEnumAsByte<EPhysicalSurface>, TObjectPtr<USoundBase>> FootstepSounds;
 	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
 	TObjectPtr<USoundBase> DefaultFootstepSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	TObjectPtr<USoundAttenuation> FootstepSoundAttenuation;
 	UPROPERTY(EditDefaultsOnly, Category = "Footstep")
 	float RunNoiseLoudness = 1.5f;
 	UPROPERTY(EditDefaultsOnly, Category = "Footstep")

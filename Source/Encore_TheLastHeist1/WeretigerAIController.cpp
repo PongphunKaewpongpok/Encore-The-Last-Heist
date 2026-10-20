@@ -11,6 +11,8 @@
 
 void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 {
+	const TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus);
+	
 	UBlackboardComponent* BB = GetBlackboardComponent();
 	if (BB == nullptr || Actor == nullptr) return;
 	
@@ -21,7 +23,7 @@ void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 	if (!IsValid(ThiefActor)) return;
 	if (ThiefActor->IsDead()) return;
 	
-	const TSubclassOf<UAISense> Sense = UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus);
+	
 	
 	if (Sense == UAISense_Sight::StaticClass())
 	{
@@ -50,6 +52,7 @@ void AWeretigerAIController::OnTargetSensed(AActor* Actor, FAIStimulus Stimulus)
 	if (Sense == UAISense_Hearing::StaticClass())
 	{
 		BB->SetValueAsVector(InvestigateLocationKey, Stimulus.StimulusLocation);
+		return;
 	}
 }
 

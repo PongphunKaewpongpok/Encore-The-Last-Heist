@@ -20,9 +20,9 @@ void AThiefPlayerState::CopyProperties(APlayerState* PlayerState)
 
 	if (IsValid(NewPlayerState))
 	{
-		NewPlayerState->DisplayName = DisplayName.ToString().Equals(TEXT("Anonymous"))
-										? FText::GetEmpty()
-										: DisplayName;
+		if (DisplayName.ToString().Equals(TEXT("Anonymous"))) return;
+
+		NewPlayerState->DisplayName = DisplayName;
 	}
 }
 
@@ -58,6 +58,9 @@ void AThiefPlayerState::SetDisplayName(const FText& NewDisplayName)
 	if (DisplayName.EqualTo(NewDisplayName)) return;
 
 	DisplayName = NewDisplayName;
+	
+	OnDataChanged.Broadcast();
+	ForceNetUpdate();
 }
 
 void AThiefPlayerState::PlaySomeoneDeathSound() const
