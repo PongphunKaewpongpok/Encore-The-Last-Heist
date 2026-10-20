@@ -56,6 +56,8 @@ public:
 	void OnExecuteEnded(UAnimMontage* Montage, bool bInterrupted);
 	void OnStartTranformToTigerEnded(UAnimMontage* Montage, bool bInterrupted);
 	
+	void StopOnGameEnded() const;
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_StartTranformToTiger();
 	UFUNCTION(NetMulticast, Unreliable)

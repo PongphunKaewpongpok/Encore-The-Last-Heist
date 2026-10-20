@@ -5,6 +5,7 @@
 
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "Encore_TheLastHeist1GameState.h"
 #include "WeretigerAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -112,12 +113,28 @@ void AWeretigerCharacter::OnExecuteEnded(UAnimMontage* Montage, bool bInterrupte
 	
 	AWeretigerAIController* AIConWeretiger = Cast<AWeretigerAIController>(AICon);
 	AIConWeretiger->FormChangedEvent();
+	
+	
+	
+	AEncore_TheLastHeist1GameState* GS = Cast<AEncore_TheLastHeist1GameState>(GetWorld()->GetGameState());
+	GS->CheckPlayersIsAlive();
 }
 
 void AWeretigerCharacter::OnStartTranformToTigerEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	GetMesh()->SetVisibility(false);
 	TigerMesh->SetVisibility(true);
+}
+
+void AWeretigerCharacter::StopOnGameEnded() const
+{
+	AAIController* AICon = Cast<AAIController>(GetController());
+	if (!AICon) return;
+	
+	if (IsValid(AICon->BrainComponent))
+	{
+		AICon->BrainComponent->PauseLogic(TEXT("Game End Paused"));
+	}
 }
 
 void AWeretigerCharacter::Multicast_StartTranformToTiger_Implementation()

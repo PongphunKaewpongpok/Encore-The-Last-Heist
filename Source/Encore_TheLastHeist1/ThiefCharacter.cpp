@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Encore_TheLastHeist1.h"
+#include "Encore_TheLastHeist1GameState.h"
 #include "Perception/AISense_Hearing.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -338,6 +339,8 @@ void AThiefCharacter::Multicast_RemoveOnGroundItem_Implementation(AInteractableA
 
 void AThiefCharacter::Multicast_GotExecuted_Implementation()
 {
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (!AnimInstance || !DeathAnimation) return;
 
@@ -403,11 +406,17 @@ void AThiefCharacter::GotExecuted(AWeretigerCharacter* Weretiger)
 	}
 }
 
-bool AThiefCharacter::IsDead()
+bool AThiefCharacter::IsDead() const
 {
 	if (!IsValid(ThiefComponent)) return false;
 	
 	return !ThiefComponent->bIsAlive;
+}
+
+void AThiefCharacter::DisableAllInputs()
+{
+	AThiefPlayerController* PC = Cast<AThiefPlayerController>(GetController());
+	DisableInput(PC);
 }
 
 void AThiefCharacter::PlayFootstep()
@@ -436,9 +445,8 @@ void AThiefCharacter::PlayFootstep()
 	const EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
 	TObjectPtr<USoundBase>* FoundSound = FootstepSounds.Find(SurfaceType);
-	USoundBase* Sound = FoundSound ? *FoundSound : DefaultFootstepSound;
 
-	if (Sound)
+	if (USoundBase* Sound = FoundSound ? *FoundSound : DefaultFootstepSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
 			this,

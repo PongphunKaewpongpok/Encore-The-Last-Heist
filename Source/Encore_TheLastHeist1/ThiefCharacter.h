@@ -132,7 +132,9 @@ public:
 	
 	void DropItem(const int32 Index);
 	void GotExecuted(AWeretigerCharacter* Weretiger);
-	bool IsDead();
+	bool IsDead() const;
+	
+	void DisableAllInputs();
 	UFUNCTION(BlueprintCallable, Category = "Footstep")
 	void PlayFootstep();
 };

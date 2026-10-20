@@ -3,11 +3,15 @@
 
 #include "Encore_TheLastHeist1GameState.h"
 
+#include "AIController.h"
 #include "ThiefPlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "ThiefPlayerState.h"
 #include "Encore_TheLastHeist1GameMode.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "WeretigerCharacter.h"
 
 AEncore_TheLastHeist1GameState::AEncore_TheLastHeist1GameState()
 {
@@ -38,6 +42,26 @@ void AEncore_TheLastHeist1GameState::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AEncore_TheLastHeist1GameState::CheckPlayersIsAlive()
+{
+	if (!HasAuthority()) return;
+
+	if (PlayerArray.IsEmpty()) return;
+
+	for (APlayerState* PS : PlayerArray)
+	{
+		AThiefPlayerState* ThiefPS = Cast<AThiefPlayerState>(PS);
+
+		if (ThiefPS && ThiefPS->GetIsAlive())
+		{
+			return;
+		}
+	}
+	
+	RemainingTime = 0.0f;
+	OnRep_RemainingTime();
+}
+
 void AEncore_TheLastHeist1GameState::Multicast_ReadyForTravelToLobby_Implementation()
 {
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -46,7 +70,10 @@ void AEncore_TheLastHeist1GameState::Multicast_ReadyForTravelToLobby_Implementat
 	AThiefPlayerController* ThiefPC = Cast<AThiefPlayerController>(PC);
 	if (!IsValid(ThiefPC)) return;
 	
-	ThiefPC->MusicEndGameAudioComponent->Stop();
+	if (ThiefPC->MusicEndGameAudioComponent)
+	{
+		ThiefPC->MusicEndGameAudioComponent->Stop();
+	}
 }
 
 void AEncore_TheLastHeist1GameState::Tick(float DeltaSeconds)
@@ -65,8 +92,45 @@ void AEncore_TheLastHeist1GameState::Tick(float DeltaSeconds)
 	{
 		bReturnCountdownStarted = true;
 
-		AEncore_TheLastHeist1GameMode* GM = GetWorld()->GetAuthGameMode<AEncore_TheLastHeist1GameMode>();
+		TArray<AActor*> Actors;
+		UGameplayStatics::GetAllActorsOfClass(
+			GetWorld(),
+			ACharacter::StaticClass(),
+			Actors
+		);
 
+		for (AActor* Actor : Actors)
+		{
+			ACharacter* Character = Cast<ACharacter>(Actor);
+
+			if (!Character) continue;
+
+			Character->GetCharacterMovement()->StopMovementImmediately();
+			Character->GetCharacterMovement()->DisableMovement();
+
+			if (AAIController* AIController = Cast<AAIController>(Character->GetController()))
+			{
+				AIController->StopMovement();
+				
+				if (AThiefPlayerController* ThiefPC = Cast<AThiefPlayerController>(AIController))
+				{
+					ThiefPC->bGameEnd = true;
+				}
+			}
+			
+			if (AThiefCharacter* ThiefChar = Cast<AThiefCharacter>(Character))
+			{
+				ThiefChar->DisableAllInputs();
+			}
+			else if (AWeretigerCharacter* WeretigerChar = Cast<AWeretigerCharacter>(Character))
+			{
+				WeretigerChar->StopOnGameEnded();
+			}
+		}
+		
+		
+		AEncore_TheLastHeist1GameMode* GM = GetWorld()->GetAuthGameMode<AEncore_TheLastHeist1GameMode>();
+		
 		if (IsValid(GM))
 		{
 			GM->StartCountdownReturnToLobby(10.0f);
