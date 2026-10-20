@@ -6,6 +6,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Encore_TheLastHeist1GameState.generated.h"
 
+class AThiefPlayerState;
 /**
  * 
  */

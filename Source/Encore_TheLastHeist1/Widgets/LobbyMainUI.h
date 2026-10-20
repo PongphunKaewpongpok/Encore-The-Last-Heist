@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "LobbyMainUI.generated.h"
 
+class ALobbyPlayerState;
+class UScrollBox;
+class ULobbyDisplayNameBar;
 /**
  * 
  */
@@ -14,4 +17,20 @@ class ENCORE_THELASTHEIST1_API ULobbyMainUI : public UUserWidget
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void NativeConstruct() override;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	TObjectPtr<UScrollBox> DisplayNameListTab;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<ULobbyDisplayNameBar> LobbyDisplayNameBarClass;
+	
+public:
+	UFUNCTION()
+	void HandleDataChanged();
+
+	void BindSinglePlayerState(ALobbyPlayerState* LobbyPS);
+	
+	void RefreshDisplayNameTab();
 };

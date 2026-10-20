@@ -20,6 +20,11 @@ void ALobbyPlayerState::CopyProperties(APlayerState* PlayerState)
 	}
 }
 
+ALobbyPlayerState::ALobbyPlayerState()
+{
+	bReplicates = true;
+}
+
 void ALobbyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -35,6 +40,9 @@ void ALobbyPlayerState::OnRep_DisplayName()
 	if (!PC->IsLocalController()) return;
 	
 	PC->LobbyDisplayNameWidget->SetDisplayName(DisplayName);
+	
+	OnDataChanged.Broadcast();
+	ForceNetUpdate();
 }
 
 void ALobbyPlayerState::SetDisplayName(const FText& NewDisplayName)
@@ -43,4 +51,7 @@ void ALobbyPlayerState::SetDisplayName(const FText& NewDisplayName)
 	if (DisplayName.EqualTo(NewDisplayName)) return;
 
 	DisplayName = NewDisplayName;
+	
+	OnDataChanged.Broadcast();
+	ForceNetUpdate();
 }

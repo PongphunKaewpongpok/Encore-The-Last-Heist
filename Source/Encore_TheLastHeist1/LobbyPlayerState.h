@@ -18,6 +18,8 @@ protected:
 	virtual void CopyProperties(APlayerState* PlayerState) override;
 	
 public:
+	ALobbyPlayerState();
+	
 	virtual auto GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const -> void override;
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDataChanged);

@@ -19,8 +19,7 @@ AEncore_TheLastHeist1GameState::AEncore_TheLastHeist1GameState()
 	bReplicates = true;
 }
 
-void AEncore_TheLastHeist1GameState::AddPlayerState(
-	APlayerState* PlayerState)
+void AEncore_TheLastHeist1GameState::AddPlayerState(APlayerState* PlayerState)
 {
 	Super::AddPlayerState(PlayerState);
 
@@ -31,8 +30,7 @@ void AEncore_TheLastHeist1GameState::AddPlayerState(
 	}
 }
 
-void AEncore_TheLastHeist1GameState::RemovePlayerState(
-	APlayerState* PlayerState)
+void AEncore_TheLastHeist1GameState::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
 }
