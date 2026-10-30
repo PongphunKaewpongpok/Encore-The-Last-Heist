@@ -38,3 +38,36 @@ Encore: The Last Heist เป็นเกมแนวสยองขวัญแ
 
 โปรเจกต์นี้พัฒนาขึ้นเพื่อเป็นส่วนหนึ่งของรายวิชา **[ADVANCED GAME DEVELOPMENT WITH GAME ENGINE]** สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง (KMITL)
 
+
+
+
+## Bug Report!
+- บัค Fatal error! __**คาดว่า**__เกิดเมื่อทุกคนตายหมด
+
+Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0x00000000000003c0
+
+0x00007ff632993907 Encore_TheLastHeist1.exe!UMainUI::SetTimeLeft() [F:\College_Work\UE_Projects\Encore_TheLastHeist1\Source\Encore_TheLastHeist1\Widgets\MainUI.cpp:147]
+0x00007ff63299aa0e Encore_TheLastHeist1.exe!AEncore_TheLastHeist1GameState::OnRep_RemainingTime() [F:\College_Work\UE_Projects\Encore_TheLastHeist1\Source\Encore_TheLastHeist1\Encore_TheLastHeist1GameState.cpp:147]
+0x00007ff63299aaa0 Encore_TheLastHeist1.exe!AEncore_TheLastHeist1GameState::Tick() [F:\College_Work\UE_Projects\Encore_TheLastHeist1\Source\Encore_TheLastHeist1\Encore_TheLastHeist1GameState.cpp:89]
+0x00007ff630d3888a Encore_TheLastHeist1.exe!AActor::TickActor() []
+0x00007ff630d1121a Encore_TheLastHeist1.exe!FActorTickFunction::ExecuteTick() []
+0x00007ff63223c435 Encore_TheLastHeist1.exe!FTickFunctionTask::DoTask() []
+0x00007ff63223eab5 Encore_TheLastHeist1.exe!TGraphTask<FTickFunctionTask>::ExecuteTask() []
+0x00007ff62ae1c2d4 Encore_TheLastHeist1.exe!UE::Tasks::Private::FTaskBase::TryExecuteTask() []
+0x00007ff62ae104f8 Encore_TheLastHeist1.exe!FNamedTaskThread::ProcessTasksNamedThread() []
+0x00007ff62ae10849 Encore_TheLastHeist1.exe!FNamedTaskThread::ProcessTasksUntilIdle() []
+0x00007ff62ae10f5d Encore_TheLastHeist1.exe!FTaskGraphCompatibilityImplementation::ProcessUntilTasksComplete() []
+0x00007ff632255af8 Encore_TheLastHeist1.exe!FTickTaskSequencer::ReleaseTickGroup() []
+0x00007ff63225b923 Encore_TheLastHeist1.exe!FTickTaskManager::RunTickGroup() []
+0x00007ff63184f0a1 Encore_TheLastHeist1.exe!UWorld::RunTickGroup() []
+0x00007ff631857a44 Encore_TheLastHeist1.exe!UWorld::Tick() []
+0x00007ff6315873db Encore_TheLastHeist1.exe!UGameEngine::Tick() []
+0x00007ff63271159c Encore_TheLastHeist1.exe!FEngineLoop::Tick() []
+0x00007ff63271f3cd Encore_TheLastHeist1.exe!GuardedMain() []
+0x00007ff63271f4ba Encore_TheLastHeist1.exe!GuardedMainWrapper() []
+0x00007ff6327220ca Encore_TheLastHeist1.exe!LaunchWindowsStartup() []
+0x00007ff63272dee4 Encore_TheLastHeist1.exe!WinMain() []
+0x00007ff636c2885a Encore_TheLastHeist1.exe!__scrt_common_main_seh() [D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288]
+0x00007ffd3bf6dda7 KERNEL32.DLL!UnknownFunction []
+
+
